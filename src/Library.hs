@@ -32,28 +32,28 @@ type Nombre = String
 type Habilidad = String
 
 data EstadoActividad = Activa | Inactiva
-  deriving Show
+  deriving (Eq, Show)
 
 data Palo = Corazon | Pica | Diamante | Trebol
-  deriving Show
+  deriving (Eq, Show)
 
 data RolCombate = Curador | Guerrero | Explosivo | Espia
-  deriving Show
+  deriving (Eq, Show)
 
 -- --------------- Ejemplos
 
 -- Ejemplos de cartas
 carta1 :: CartaMagica
-carta1 = CartaMagica 5 Corazon Activa
+carta1 = UnaCartaMagica 5 Corazon Activa
 
 carta2 :: CartaMagica
-carta2 = CartaMagica 3 Pica Inactiva
+carta2 = UnaCartaMagica 3 Pica Inactiva
 
 carta3 :: CartaMagica
-carta3 = CartaMagica 10 Diamante Activa
+carta3 = UnaCartaMagica 10 Diamante Activa
 
 carta4 :: CartaMagica
-carta4 = CartaMagica 7 Trebol Inactiva
+carta4 = UnaCartaMagica 7 Trebol Inactiva
 
 ejercitoReinaRoja :: FuerzasRojas
 ejercitoReinaRoja = [carta1, carta2, carta3, carta4]
@@ -88,10 +88,10 @@ energiaTotalReinaBlanca :: FuerzasBlancas -> Number
 energiaTotalReinaBlanca (capitan, brujo) = sumaHabilidad brujo + poder capitan
 
 sumaHabilidad :: SoldadoBlanco -> Number
-sumaHabilidad = calculoComunPersonajes funcionSumaHabilidad
+sumaHabilidad soldado = calculoComunPersonajes soldado funcionSumaHabilidad
 
 poder :: SoldadoBlanco -> Number
-poder = calculoComunPersonajes funcionPoder
+poder soldado = calculoComunPersonajes soldado funcionPoder
 
 {-
 El lenguaje nos permite simplificar, como si fuera una ecuacion matematica,
@@ -127,8 +127,8 @@ cantBaseHabilidades = 3
 puntosBase :: Number
 puntosBase = 5
 
-cantSobrepeso :: Number
-cantSobrepeso = 3
+cantMulta :: Number
+cantMulta = 3
   
 bonusCantHabilidades :: [Habilidad] -> Number
 bonusCantHabilidades habilidades = bonusCantBase habilidades - multaSobrepeso habilidades
@@ -137,7 +137,7 @@ bonusCantBase :: [Habilidad] -> Number
 bonusCantBase habilidades = min (length habilidades) cantBaseHabilidades * puntosBase
 
 multaSobrepeso :: [Habilidad] -> Number
-sobrepeso habilidades = max (length habilidades - cantBaseHabilidades) 0 * cantMulta
+multaSobrepeso habilidades = max (length habilidades - cantBaseHabilidades) 0 * cantMulta 
 
 bonusElemento :: String -> [Habilidad] -> Number
 bonusElemento eltoClave habilidades
@@ -168,10 +168,10 @@ rolParaTrebol carta
 poderMagicoCarta :: CartaMagica -> Number
 poderMagicoCarta carta
   | estado carta == Inactiva = 0
-  | rolCombate carta == Explosivo = nivel carta * 12
-  | rolCombate carta == Guerrero = nivel carta * 8 + bonusDiamante (palo carta)
-  | rolCombate carta == Espia  = poderEspia (nivel carta)
-  | rolCombate carta == Curador = 0.5
+  | rolEnCombate carta == Explosivo = nivel carta * 12
+  | rolEnCombate carta == Guerrero = nivel carta * 8 + bonusDiamante (palo carta)
+  | rolEnCombate carta == Espia  = poderEspia (nivel carta)
+  | rolEnCombate carta == Curador = 0.5
 
 bonusDiamante :: Palo -> Number
 bonusDiamante palo
@@ -198,7 +198,7 @@ poderMagicoReinaRoja cartas = poderMagicoCarta (head cartas) + poderMagicoCarta 
 -- Función principal: infiltrar una carta en el ejército de la Reina Roja
 infiltrarCarta :: CartaMagica -> Number -> FuerzasRojas -> FuerzasRojas
 infiltrarCarta cartaInfiltrada n ejercito =
-  tomarInicio ejercito ++ [transformarCarta carta n] ++ [last ejercito]
+  tomarInicio ejercito ++ [transformarCarta cartaInfiltrada n] ++ [last ejercito]
 
 -- Toma todas las cartas menos la última
 tomarInicio :: [CartaMagica] -> [CartaMagica]
@@ -207,7 +207,7 @@ tomarInicio ejercito = take (length ejercito - 1) ejercito
 -- Transformación según número secreto n
 transformarCarta :: CartaMagica -> Number -> CartaMagica
 transformarCarta cartaInfiltrada n
-  | esDivisible n 4 = cambiarPalo (cambiarNivel cartaInfiltrada n) diamante
+  | esDivisible n 4 = cambiarPalo (cambiarNivel cartaInfiltrada n) Diamante
   | n == 33 = cambiarPalo cartaInfiltrada Corazon
   | esDivisible n 7 = cambiarPalo cartaInfiltrada Pica
   | otherwise = cartaInfiltrada{estado = Inactiva}
@@ -219,7 +219,7 @@ cambiarPalo :: CartaMagica -> Palo -> CartaMagica
 cambiarPalo carta nuevoPalo = carta{palo = nuevoPalo}
 
 cambiarNivel :: CartaMagica -> Number -> CartaMagica
-cambiarPalo carta nuevoNivel = carta{nivel = nuevoNivel}
+cambiarNivel carta nuevoNivel = carta{nivel = nuevoNivel}
 
 -- Aunque uno podría estar tentado a hacer una función 
 -- cambiaProp :: CartaMagica -> a -> b -> CartaMagica
@@ -248,7 +248,7 @@ aprenderHechizo soldado habilidad
 
 puedeAprender :: SoldadoBlanco -> Habilidad  -> Bool
 puedeAprender soldado habilidad 
-  | habilidadYaDominada soldado habilidad = False
+  | habilidadYaDominada habilidad soldado  = False
   | primerasTresLetrasIguales (nombre soldado) habilidad = True
   | length (habilidades soldado) > 100 = True
   | otherwise = False
@@ -260,7 +260,7 @@ primerasTresLetras :: String -> String
 primerasTresLetras = take 3
 
 habilidadYaDominada :: String -> Brujo -> Bool
-habilidadYaDominada soldado habilidad = habilidad `elem` habilidades soldado
+habilidadYaDominada habilidad soldado = habilidad `elem` snd soldado
 
 -- Segunda Funcion
 intercambiarRolSeguidores :: FuerzasBlancas -> FuerzasBlancas
@@ -272,16 +272,21 @@ intercambiarRolSeguidores (capitan, brujo) = (brujo, capitan)
 prepararCarta :: CartaMagica -> CartaMagica
 prepararCarta carta = transformar (actualizarNivel carta)
 
-prepararCarta :: CartaMagica -> CartaMagica
+--prepararCarta :: CartaMagica -> CartaMagica
 prepararCarta carta
   | estado carta == Activa = cambiarNivel carta (nivel carta + 2)
   | otherwise = carta
 
 transformar :: CartaMagica -> CartaMagica
 transformar carta
-  | poderMagico carta > 120 = cambiarPalo carta Diamante
-  | poderMagico carta < 20  = cambiarPalo carta Corazon
+  | poderMagicoCarta carta > 120 = cambiarPalo carta Diamante
+  | poderMagicoCarta carta < 20  = cambiarPalo carta Corazon
   | otherwise = carta
+
+
+actualizarNivel:: CartaMagica -> CartaMagica
+actualizarNivel carta = carta
+--TODO
 
 -- --------------- Test de Equilibrio
 
@@ -289,8 +294,8 @@ formacionBalanceada :: [CartaMagica] -> Bool
 formacionBalanceada ejercito = esPar ejercito && rolesDif ejercito
 
 esPar :: [CartaMagica] -> Bool
-esPar = even length 
+esPar ejercito = even (length ejercito)
 
 rolesDif :: [CartaMagica] -> Bool
 rolesDif ejercito = 
-  rolCombate (head ejercito) /= rolCombate (last ejercito)
+  rolEnCombate (head ejercito) /= rolEnCombate (last ejercito)
