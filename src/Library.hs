@@ -18,21 +18,18 @@ data CartaMagica = UnaCartaMagica {
 -- dato sea simple "CartaMagica" y el contructor 
 -- "UnaCartaMagica".
 
-type Brujo = (Nombre, [Hechizo])
-type Capitan = (Nombre, [Arma])
-type FuerzasBlancas = (Capitan, Brujo)
+type FuerzasRojas = [CartaMagica]
 
--- Se podria plantear tambien:
--- type Habilidad = String 
--- type SoldadoBlanco = [Habilidad]
--- type FuerzasBlancas = (SoldadoBlanco, SoldadoBlanco)
+type SoldadoBlanco = (Nombre, [Habilidad])
+type Brujo = SoldadoBlanco
+type Capitan = SoldadoBlanco
+type FuerzasBlancas = (Capitan, Brujo)
 
 -- --------------- Definicion de Tipos
 
 type Nivel = Number
-type Arma = String
-type Hechizo = String
 type Nombre = String
+type Habilidad = String
 
 data EstadoActividad = Activa | Inactiva
   deriving Show
@@ -58,27 +55,23 @@ carta3 = CartaMagica 10 Diamante Activa
 carta4 :: CartaMagica
 carta4 = CartaMagica 7 Trebol Inactiva
 
-ejercitoReinaRoja :: [CartaMagica]
+ejercitoReinaRoja :: FuerzasRojas
 ejercitoReinaRoja = [carta1, carta2, carta3, carta4]
 
 daliaCentenaria :: Capitan
-daliaCentenaria = ["espada de petalo", "daga espinosa", "lanzador de abono"]
+daliaCentenaria = ("daliaCentenaria", ["espada de petalo", "daga espinosa", "lanzador de abono"])
 
 rosaEnvidiosa :: Capitan
-rosaEnvidiosa = ["daga espinosa", "escudo rojo pasión", "rifle ak16"]
+rosaEnvidiosa = ("rosaEnvidiosa", ["daga espinosa", "escudo rojo pasión", "rifle ak16"])
 
 gatoDeCheshire :: Brujo
-gatoDeCheshire = ["desaparecetus", "abrete sesamo", "abracadabra"]
+gatoDeCheshire = ("gatoChesire", ["desaparecetus", "abrete sesamo", "abracadabra"])
 
-sombrerero :: [String]
-sombrerero = []
+sombrerero :: SoldadoBlanco
+sombrerero = ("sombrerero", [])
 
--- Si se elige la otra opción, aca encontrariamos
--- sombrereo :: SoldadoBlanco
--- sombrerero = []
-
-fuerzasReinaBlanca :: FuerzasBlancas
-fuerzasReinaBlanca = (daliaCentenaria, gatoDeCheshire)
+ejercitoReinaBlanca :: FuerzasBlancas
+ejercitoReinaBlanca = (daliaCentenaria, gatoDeCheshire)
 
 -- -----------------------------------------------------------------------------
 -- --------------- PARTE II: PREPARANDO CAMPO DE BATALLA ---------------------------------
@@ -87,11 +80,20 @@ fuerzasReinaBlanca = (daliaCentenaria, gatoDeCheshire)
 
 -- A CAMBIAR
 
+funcionSumaHabilidad :: Number
+funcionSumaHabilidad = 1
+
+funcionPoder :: Number
+funcionPoder = 0
+
 energiaTotalReinaBlanca :: FuerzasBlancas -> Number
 energiaTotalReinaBlanca (capitan, brujo) = sumaHabilidad brujo + poder capitan
 
-sumaHabilidad :: (String, [String]) -> Number
-sumaHabilidad = calculo
+sumaHabilidad :: SoldadoBlanco -> Number
+sumaHabilidad = calculoComunPersonajes funcionSumaHabilidad
+
+poder :: SoldadoBlanco -> Number
+poder = calculoComunPersonajes funcionPoder
 
 {-
 El lenguaje nos permite simplificar, como si fuera una ecuacion matematica,
@@ -101,79 +103,70 @@ Al igual que una ecuacion, no se puede sacar cualquier cosa, solo podemos sacar
 los parametros (nunca funciones) que estén "sueltas".
 
 sumaHabilidad :: (String, [String]) -> Number
-sumaHabilidad personaje = energia personaje
+sumaHabilidad personaje = calculoComunPersonajes personaje
+
+poder :: Capitan -> Number
+poder personaje = calculoComunPersonajes personaje
 -}
 
+calculoComunPersonajes :: SoldadoBlanco -> Number -> Number
+calculoComunPersonajes (nombre, habilidades) tipoFuncion
+  | null habilidades = length nombre * 5
+  | otherwise = 50 + bonusPorFuncion habilidades tipoFuncion
 
-energia :: SoldadoBlanco -> Number -> Number
-energia (nombre, lista) tipoPersonaje
-  | null lista = length nombre * 5
-  | otherwise = 50 + bonusPersonaje lista tipoPersonaje
-
-bonusPersonaje :: [Arma] -> Number -> Number
-bonusPersonaje armas 1 = bonusElemento "espada de petalo" armas + bonusArmas armas
-bonusPersonaje hechizos 0 = bonusElemento "desaparacetus" hechizos
-
-
+bonusPorFuncion:: [Habilidad] -> Number -> Number
+bonusPorFuncion habilidades tipoFuncion
+  | tipoFuncion == funcionPoder = bonusElemento "espada de petalo" armas + bonusCantHabilidades armas
+  | tipoFuncion == funcionSumaHabilidad = bonusElemento "desaparacetus" hechizos
 
 
-
-cantBaseEspadas :: Number
-cantBaseEspadas = 3
+cantBaseHabilidades :: Number
+cantBaseHabilidades = 3
 
 puntosBase :: Number
 puntosBase = 5
 
-cantMulta :: Number
-cantMulta = 3
-
-
-{-
-  energiaTotalReinaBlanca :: FuerzasBlancas -> Number
-energiaTotalReinaBlanca (capitan, brujo) = energiaCapitan capitan + energiaBrujo brujo
-
-energiaCapitan :: Capitan -> Number
-energiaCapitan (nombres, armas)
-  | null armas = length nombre * 5
-  | otherwise = 50 + bonusElemento "espada de petalo" armas + bonusArmas armas
-
-energiaBrujo :: Brujo -> Float
-energiaBrujo (Brujo nombre hechizos _)
-  | null hechizos = letrasNombre nombre * 5
-  | otherwise = 50 + bonusElemento "desaparacetus" hechizos
--}
+cantSobrepeso :: Number
+cantSobrepeso = 3
   
-bonusArmas :: [Arma] -> Number
-bonusArmas armas = bonusCantBase armas - multaSobrepeso armas
+bonusCantHabilidades :: [Habilidad] -> Number
+bonusCantHabilidades habilidades = bonusCantBase habilidades - multaSobrepeso habilidades
 
-bonusCantBase :: [Arma] -> Number
-bonusCantBase armas = min (length armas) cantBaseEspadas * puntosBase
+bonusCantBase :: [Habilidad] -> Number
+bonusCantBase habilidades = min (length habilidades) cantBaseHabilidades * puntosBase
 
-multaSobrepeso :: [Arma] -> Number
-sobrepeso armas = max (length armas - cantBaseEspadas) 0 * cantMulta
+multaSobrepeso :: [Habilidad] -> Number
+sobrepeso habilidades = max (length habilidades - cantBaseHabilidades) 0 * cantMulta
 
-bonusElemento :: String -> [String] -> Number
-bonusEspada eltoClave armas
-  | elem eltoClave armas = 10
+bonusElemento :: String -> [Habilidad] -> Number
+bonusElemento eltoClave habilidades
+  | elem eltoClave habilidades = 10
   | otherwise = 0
 
 -- --------------- Poder Mágico
 
 -- Determina el rol en combate de una carta
-rolCombate :: CartaMagica -> RolCombate
-rolCombate (UnaCartaMagica nivel Corazon _) = Curador
-rolCombate (UnaCartaMagica nivel Pica _) = Guerrero
-rolCombate (UnaCartaMagica nivel Diamante _) 
-  | nivel > 5 = Explosivo
+rolEnCombate :: CartaMagica -> RolCombate
+rolEnCombate carta
+  | palo carta == Corazon = Curador
+  | palo carta == Pica = Guerrero
+  | palo carta == Diamante = rolParaDiamante carta
+  | otherwise = rolParaTrebol carta
+
+rolParaDiamante :: CartaMagica -> RolCombate
+rolParaDiamante carta
+  | nivel carta > 5 = Explosivo
   | otherwise = Guerrero
-rolCombate (CartaMagica _ Trebol estadoAct)
-  | estadoAct == Activa = Espia
+
+rolParaTrebol :: CartaMagica -> RolCombate
+rolParaTrebol carta
+  | estado carta == Activa = Espia
   | otherwise = Guerrero
 
 -- Poder mágico individual de una carta
-poderMagicoCarta :: CartaMagica -> Float
-poderMagicoCarta (CartaMagica _ _ Inactiva) = 0
+poderMagicoCarta :: CartaMagica -> Number
 poderMagicoCarta carta
+  | estado carta == Inactiva = 0
   | rolCombate carta == Explosivo = nivel carta * 12
   | rolCombate carta == Guerrero = nivel carta * 8 + bonusDiamante (palo carta)
   | rolCombate carta == Espia  = poderEspia (nivel carta)
@@ -193,7 +186,7 @@ poderEspiaBase :: Number -> Number
 poderEspiaBase nivel = (13 - nivel) * 7
 
 -- Poder mágico total de la Reina Roja
-poderMagicoReinaRoja :: [CartaMagica] -> Float
+poderMagicoReinaRoja :: [CartaMagica] -> Number
 poderMagicoReinaRoja [] = 0
 poderMagicoReinaRoja [carta] = 3 * poderMagicoCarta carta
 poderMagicoReinaRoja cartas = poderMagicoCarta (head cartas) + poderMagicoCarta (cartas !! 1) + poderMagicoCarta (last cartas)
@@ -202,8 +195,8 @@ poderMagicoReinaRoja cartas = poderMagicoCarta (head cartas) + poderMagicoCarta 
 -- --------------- Infiltracion Encubierta
 
 -- Función principal: infiltrar una carta en el ejército de la Reina Roja
-infiltrarCarta :: CartaMagica -> Number -> [CartaMagica] -> [CartaMagica]
-infiltrarCarta carta n ejercito =
+infiltrarCarta :: CartaMagica -> Number -> FuerzasRojas -> FuerzasRojas
+infiltrarCarta cartaInfiltrada n ejercito =
   tomarInicio ejercito ++ [transformarCarta carta n] ++ [last ejercito]
 
 -- Toma todas las cartas menos la última
@@ -212,54 +205,77 @@ tomarInicio ejercito = take (length ejercito - 1) ejercito
 
 -- Transformación según número secreto n
 transformarCarta :: CartaMagica -> Number -> CartaMagica
--- A COMPLETAR
+transformarCarta cartaInfiltrada n
+  | esDivisible n 4 = cambiarPalo (cambiarNivel cartaInfiltrada n) diamante
+  | n == 33 = cambiarPalo cartaInfiltrada Corazon
+  | esDivisible n 7 = cambiarPalo cartaInfiltrada Pica
+  | otherwise = cartaInfiltrada{estado = Inactiva}
+
+esDivisible :: Number -> Number -> Bool
+esDivisible dividendo divisor = mod dividendo divisor == 0
+
+cambiarPalo :: CartaMagica -> Palo -> CartaMagica
+cambiarPalo carta nuevoPalo = carta{palo = nuevoPalo}
+
+cambiarNivel :: CartaMagica -> Number -> CartaMagica
+cambiarPalo carta nuevoNivel = carta{nivel = nuevoNivel}
 
 -- -----------------------------------------------------------------------------
 -- --------------- PARTE III: ARCO DE ENTRENAMIENTO ---------------------------------
 
 -- --------------- UTN: Universidad de Trucos y Nigromancia
--- A CAMBIAR ?
 
-aprenderHechizo :: Brujo -> String -> Brujo
-aprenderHechizo brujo hechizo
-  | puedeAprender brujo hechizo = (fst brujo, snd brujo ++ [hechizo])
-  | otherwise = brujo
+-- Primera Funcion
 
--- Verifica si el brujo puede aprender el hechizo
-puedeAprender :: Brujo -> String -> Bool
-puedeAprender brujo hechizo 
-  | primerasTresLetras (fst brujo) == primerasTresLetras hechizo = True
-  | length (snd brujo) > 100 = True
-  | hechizoYaDominado hechizo brujo = False
+aprenderHechizo :: SoldadoBlanco -> Habilidad -> SoldadoBlanco
+aprenderHechizo soldado habilidad
+  | puedeAprender soldado habilidad = (fst soldado, snd soldado ++ [habilidad])
+  | otherwise = soldado
+
+puedeAprender :: SoldadoBlanco -> Habilidad  -> Bool
+puedeAprender soldado habilidad 
+  | habilidadYaDominada soldado habilidad = False
+  | primerasTresLetrasIguales (fst soldado) habilidad = True
+  | length (snd soldado) > 100 = True
   | otherwise = False
+
+primerasTresLetrasIguales :: String -> String -> Bool
+primerasTresLetrasIguales p1 p2 = primerasTresLetras p1 == primerasTresLetras p2
 
 primerasTresLetras :: String -> String
 primerasTresLetras = take 3
 
-hechizoYaDominado :: String -> Brujo -> Bool
-hechizoYaDominado hechizo brujo = hechizo `elem` (snd brujo)
+habilidadYaDominada :: String -> Brujo -> Bool
+habilidadYaDominada soldado habilidad = habilidad `elem` snd soldado
+
+-- Segunda Funcion
+intercambiarRolSeguidores :: FuerzasBlancas -> FuerzasBlancas
+intercambiarRolSeguidores (capitan, brujo) = (brujo, capitan)
 
 -- --------------- Pre-Batalla
 
 -- Preparamos una carta para la batalla según su nivel y poder mágico
 prepararCarta :: CartaMagica -> CartaMagica
+prepararCarta carta = transformar (actualizarNivel carta)
+
+prepararCarta :: CartaMagica -> CartaMagica
 prepararCarta carta
-  | estado carta == Activa = transformar carta{ nivel = nivel carta + 2 }
+  | estado carta == Activa = cambiarNivel carta (nivel carta + 2)
   | otherwise = carta
 
 transformar :: CartaMagica -> CartaMagica
 transformar carta
-  | poderMagico carta > 120 = carta { palo = Diamante }
-  | poderMagico carta < 20  = carta { palo = Corazon }
+  | poderMagico carta > 120 = cambiarPalo carta Diamante
+  | poderMagico carta < 20  = cambiarPalo carta Corazon
   | otherwise = carta
 
 -- --------------- Test de Equilibrio
 
-formacionEquilibrada :: [CartaMagica] -> Bool
-formacionEquilibrada ejercito = esPar ejercito && rolesDif ejercito
+formacionBalanceada :: [CartaMagica] -> Bool
+formacionBalanceada ejercito = esPar ejercito && rolesDif ejercito
 
 esPar :: [CartaMagica] -> Bool
-esPar ejercito = even length ejercito
+esPar = even length 
 
 rolesDif :: [CartaMagica] -> Bool
 rolesDif ejercito = 
