@@ -13,29 +13,26 @@ data CartaMagica = UnaCartaMagica {
   estado :: EstadoActividad
 } deriving Show
 
+-- Solemos tratar de generar una diferenciación entre 
+-- Tipo de Dato y Constructor, haciendo que el tipo de 
+-- dato sea simple "CartaMagica" y el contructor 
+-- "UnaCartaMagica".
 
--- Solemos tratar de generar una diferenciación entre Tipo de Dato y Contructor, haciendo que el tipo de dato sea simple "CartaMágicaa" y el contructor "UnaCartaMagica".
-
--- Capitán: (Nombre, [Armas])
+type Brujo = (Nombre, [Hechizo])
 type Capitan = (Nombre, [Arma])
-
--- Brujo: (Nombre, [Hechizos], Edad)
-type Brujo = (Nombre, [Hechizo], Edad)
-
-type SoldadoBlanco = (Nombre, [String])
-
--- Fuerzas de la Reina Blanca: (Capitán, Brujo)
 type FuerzasBlancas = (Capitan, Brujo)
 
--- Se podria plantear tambien con DATA. 
+-- Se podria plantear tambien:
+-- type Habilidad = String 
+-- type SoldadoBlanco = [Habilidad]
+-- type FuerzasBlancas = (SoldadoBlanco, SoldadoBlanco)
 
 -- --------------- Definicion de Tipos
 
 type Nivel = Number
-type Nombre = Sring
 type Arma = String
 type Hechizo = String
-type Edad = Number
+type Nombre = String
 
 data EstadoActividad = Activa | Inactiva
   deriving Show
@@ -61,21 +58,24 @@ carta3 = CartaMagica 10 Diamante Activa
 carta4 :: CartaMagica
 carta4 = CartaMagica 7 Trebol Inactiva
 
--- Ejército de cartas mágicas de la Reina Roja
 ejercitoReinaRoja :: [CartaMagica]
 ejercitoReinaRoja = [carta1, carta2, carta3, carta4]
 
 daliaCentenaria :: Capitan
-daliaCentenaria = ("Dalia Centenaria", ["espada de petalo", "daga", "lanza"])
+daliaCentenaria = ["espada de petalo", "daga espinosa", "lanzador de abono"]
 
-capitanInventado :: Capitan
-capitanInventado = ("Florencio el Valiente", ["mazo", "escudo", "espada corta"])
+rosaEnvidiosa :: Capitan
+rosaEnvidiosa = ["daga espinosa", "escudo rojo pasión", "rifle ak16"]
 
 gatoDeCheshire :: Brujo
-gatoDeCheshire = ("Gato de Cheshire", ["desaparecetus", "abrete sesamo", "abracadabra"], 150)
+gatoDeCheshire = ["desaparecetus", "abrete sesamo", "abracadabra"]
 
-sombrerero :: Brujo
-sombrerero = ("El Sombrerero", [], 100)
+sombrerero :: [String]
+sombrerero = []
+
+-- Si se elige la otra opción, aca encontrariamos
+-- sombrereo :: SoldadoBlanco
+-- sombrerero = []
 
 fuerzasReinaBlanca :: FuerzasBlancas
 fuerzasReinaBlanca = (daliaCentenaria, gatoDeCheshire)
@@ -87,11 +87,36 @@ fuerzasReinaBlanca = (daliaCentenaria, gatoDeCheshire)
 
 -- A CAMBIAR
 
-esCapitan :: Number
-esCapitan = 1
+energiaTotalReinaBlanca :: FuerzasBlancas -> Number
+energiaTotalReinaBlanca (capitan, brujo) = sumaHabilidad brujo + poder capitan
 
-esBrujo :: Number
-esBrujo = 0
+sumaHabilidad :: (String, [String]) -> Number
+sumaHabilidad = calculo
+
+{-
+El lenguaje nos permite simplificar, como si fuera una ecuacion matematica,
+aquellos valores que encontramos de ambos lados. 
+
+Al igual que una ecuacion, no se puede sacar cualquier cosa, solo podemos sacar
+los parametros (nunca funciones) que estén "sueltas".
+
+sumaHabilidad :: (String, [String]) -> Number
+sumaHabilidad personaje = energia personaje
+-}
+
+
+energia :: SoldadoBlanco -> Number -> Number
+energia (nombre, lista) tipoPersonaje
+  | null lista = length nombre * 5
+  | otherwise = 50 + bonusPersonaje lista tipoPersonaje
+
+bonusPersonaje :: [Arma] -> Number -> Number
+bonusPersonaje armas 1 = bonusElemento "espada de petalo" armas + bonusArmas armas
+bonusPersonaje hechizos 0 = bonusElemento "desaparacetus" hechizos
+
+
+
+
 
 cantBaseEspadas :: Number
 cantBaseEspadas = 3
@@ -102,17 +127,6 @@ puntosBase = 5
 cantMulta :: Number
 cantMulta = 3
 
-energiaTotalReinaBlanca :: FuerzasBlancas -> Number
-energiaTotalReinaBlanca (capitan, brujo) = energia capitan esCapitan + energia brujo esBrujo
-
-energia :: SoldadoBlanco -> Number -> Number
-energia (nombre, lista) tipoPersonaje
-  | null lista = length nombre * 5
-  | otherwise = 50 + bonusPersonaje lista tipoPersonaje
-
-bonusPersonaje :: [Arma] -> Number -> Number
-bonusPersonaje armas 1 = bonusElemento "espada de petalo" armas + bonusArmas armas
-bonusPersonaje hechizos 0 = bonusElemento "desaparacetus" hechizos
 
 {-
   energiaTotalReinaBlanca :: FuerzasBlancas -> Number
