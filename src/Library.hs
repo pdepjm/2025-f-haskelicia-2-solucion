@@ -78,8 +78,6 @@ ejercitoReinaBlanca = (daliaCentenaria, gatoDeCheshire)
 
 -- --------------- Energia Total
 
--- A CAMBIAR
-
 funcionSumaHabilidad :: Number
 funcionSumaHabilidad = 1
 
@@ -105,8 +103,11 @@ los parametros (nunca funciones) que estén "sueltas".
 sumaHabilidad :: (String, [String]) -> Number
 sumaHabilidad personaje = calculoComunPersonajes personaje
 
-poder :: Capitan -> Number
-poder personaje = calculoComunPersonajes personaje
+Se vuelve
+
+sumaHabilidad :: (String, [String]) -> Number
+sumaHabilidad = calculoComunPersonajes
+
 -}
 
 calculoComunPersonajes :: SoldadoBlanco -> Number -> Number
@@ -116,8 +117,8 @@ calculoComunPersonajes (nombre, habilidades) tipoFuncion
 
 bonusPorFuncion:: [Habilidad] -> Number -> Number
 bonusPorFuncion habilidades tipoFuncion
-  | tipoFuncion == funcionPoder = bonusElemento "espada de petalo" armas + bonusCantHabilidades armas
-  | tipoFuncion == funcionSumaHabilidad = bonusElemento "desaparacetus" hechizos
+  | tipoFuncion == funcionPoder = bonusElemento "espada de petalo" habilidades + bonusCantHabilidades habilidades
+  | tipoFuncion == funcionSumaHabilidad = bonusElemento "desaparacetus" habilidades
 
 
 cantBaseHabilidades :: Number
@@ -220,6 +221,13 @@ cambiarPalo carta nuevoPalo = carta{palo = nuevoPalo}
 cambiarNivel :: CartaMagica -> Number -> CartaMagica
 cambiarPalo carta nuevoNivel = carta{nivel = nuevoNivel}
 
+-- Aunque uno podría estar tentado a hacer una función 
+-- cambiaProp :: CartaMagica -> a -> b -> CartaMagica
+-- cambiarProp carta prop valor = carta{a = valor}
+-- Lamentablemente no se puede !
+-- Lo que sí, en proximas clases veremos formas muy cool de
+-- resolver otro tipo de cosas parecidas. 
+
 -- -----------------------------------------------------------------------------
 -- --------------- PARTE III: ARCO DE ENTRENAMIENTO ---------------------------------
 
@@ -227,16 +235,22 @@ cambiarPalo carta nuevoNivel = carta{nivel = nuevoNivel}
 
 -- Primera Funcion
 
+nombre :: SoldadoBlanco -> Nombre
+nombre = fst
+
+habilidades :: SoldadoBlanco -> [Habilidad]
+habilidades = snd
+
 aprenderHechizo :: SoldadoBlanco -> Habilidad -> SoldadoBlanco
 aprenderHechizo soldado habilidad
-  | puedeAprender soldado habilidad = (fst soldado, snd soldado ++ [habilidad])
+  | puedeAprender soldado habilidad = (nombre soldado, habilidades soldado ++ [habilidad])
   | otherwise = soldado
 
 puedeAprender :: SoldadoBlanco -> Habilidad  -> Bool
 puedeAprender soldado habilidad 
   | habilidadYaDominada soldado habilidad = False
-  | primerasTresLetrasIguales (fst soldado) habilidad = True
-  | length (snd soldado) > 100 = True
+  | primerasTresLetrasIguales (nombre soldado) habilidad = True
+  | length (habilidades soldado) > 100 = True
   | otherwise = False
 
 primerasTresLetrasIguales :: String -> String -> Bool
@@ -246,7 +260,7 @@ primerasTresLetras :: String -> String
 primerasTresLetras = take 3
 
 habilidadYaDominada :: String -> Brujo -> Bool
-habilidadYaDominada soldado habilidad = habilidad `elem` snd soldado
+habilidadYaDominada soldado habilidad = habilidad `elem` habilidades soldado
 
 -- Segunda Funcion
 intercambiarRolSeguidores :: FuerzasBlancas -> FuerzasBlancas
