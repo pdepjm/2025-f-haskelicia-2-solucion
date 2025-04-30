@@ -25,8 +25,7 @@ type FuerzasBlancas = (Capitan, Brujo)
 
 -- Como alternativa, también podríamos usar `data` para modelar a los soldados blancos.
 -- El código a continuación muestra una posible definición usando `data`. Sin embargo, 
--- hemos optado por usar tuplas en este caso para mostrar cómo utilizarlas correctamente
--- de manera sencilla y adecuada.
+-- hemos optado por usar tuplas en este caso para mostrar cómo utilizarlas correctamente.
 
 {-
 data SoldadoBlanco = UnSoldadoBlanco {
