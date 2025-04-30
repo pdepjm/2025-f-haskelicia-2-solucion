@@ -51,7 +51,7 @@ data RolCombate = Curador | Guerrero | Explosivo | Espia
 
 -- Aunque es posible usar `String` en lugar de constructores para modelar el palo y el rol de combate, 
 -- preferimos usar múltiples constructores. Esto se debe a que al trabajar con `String` podrían surgir 
--- errores tipográficos, se coloca una carta con "espia" y otra con "espía" (con tilde), o "Diamante" y "diamante". Además, 
+-- errores tipográficos. Por ejemplo, se coloca una carta con "espia" y otra con "espía" (con tilde), o "Diamante" y "diamante". Además, 
 -- usar múltiples constructores ayuda a evitar errores comunes, como escribir "basto" en una de las cartas (cuando aqui no es una opcion).
 -- Aunque el uso de `String` no está prohibido, la opción de usar constructores múltiples es más segura y menos propensa a fallos.
 
@@ -137,7 +137,7 @@ Podemos aprovechar una característica del lenguaje que nos permite simplificar 
 como si estuviéramos resolviendo una ecuación matemática.
 
 Al igual que en las ecuaciones, solo podemos "eliminar" elementos que estén sueltos y aparezcan
-en ambos lados de la definición. Esto aplica, por ejemplo, a parámetros pero **no** a funciones.
+en ambos lados de la definición. Esto aplica, por ejemplo, a parámetros pero NO a funciones.
 
 Por ejemplo:
 
@@ -149,8 +149,7 @@ Se puede simplificar a:
 sumaHabilidad :: (String, [String]) -> Number
 sumaHabilidad = calculoComunPersonajes
 
-Esta forma es más concisa y expresa lo mismo. Aprender a reconocer estos patrones ayuda
-a escribir código más claro.
+Esta forma es más concisa y expresa lo mismo. 
 -}
 
 calculoComunPersonajes :: Number -> SoldadoBlanco -> Number
@@ -177,7 +176,9 @@ bonusCantHabilidades :: [Habilidad] -> Number
 bonusCantHabilidades habilidades = bonusCantBase habilidades - multaSobrepeso habilidades
 
 {-
-Una forma de calcular energía que tal vez les suene familiar es la que usamos en el TP anterior:
+De la misma forma habiamos calculado el peso de un pino en el TP anterior. 
+
+Recordamos que algo así:
 
 energiaPorCantArmas :: [String] -> Number
 energiaPorCantArmas armas
@@ -251,7 +252,6 @@ Cuando necesiten representar condiciones, utilicen **guardas** como lo venimos h
 Esto no significa que estén mal, solo que queremos enfocarnos en un subconjunto del lenguaje
 para aprender programación funcional con una base sólida y consistente.
 -}
-
 
 {-
 determinarRol :: Palo -> Number -> Estado -> String
