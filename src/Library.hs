@@ -13,10 +13,8 @@ data CartaMagica = UnaCartaMagica {
   estado :: EstadoActividad
 } deriving Show
 
--- Solemos tratar de generar una diferenciación entre 
--- Tipo de Dato y Constructor, haciendo que el tipo de 
--- dato sea simple "CartaMagica" y el contructor 
--- "UnaCartaMagica".
+-- Para mayor claridad, es importante distinguir entre el tipo de dato y su constructor.
+-- En este caso, el tipo de dato es "CartaMagica", mientras que el constructor es "UnaCartaMagica".
 
 type FuerzasRojas = [CartaMagica]
 
@@ -25,18 +23,17 @@ type Brujo = SoldadoBlanco
 type Capitan = SoldadoBlanco
 type FuerzasBlancas = (Capitan, Brujo)
 
--- Otra opción, completamente válida, 
--- para modelar a los soldados blancos, es usar DATA.
-{-
+-- Como alternativa, también podríamos usar `data` para modelar a los soldados blancos.
+-- El código a continuación muestra una posible definición usando `data`. Sin embargo, 
+-- hemos optado por usar tuplas en este caso para mostrar cómo utilizarlas correctamente
+-- de manera sencilla y adecuada.
 
+{-
 data SoldadoBlanco = UnSoldadoBlanco {
   nombre :: Nombre,
   habilidades :: [Habilidad]
 }
-
 -}
--- Aquí lo modelamos como tupla, así podína tener un ejemplo
--- de como lo usamos apropiadamente, de forma oficial. 
 
 -- --------------- Definicion de Tipos
 
@@ -53,17 +50,11 @@ data Palo = Corazon | Pica | Diamante | Trebol
 data RolCombate = Curador | Guerrero | Explosivo | Espia
   deriving (Eq, Show)
 
--- Otra opción para modelar palo y rol de combate es usar String,
--- para nosotros la utilización de Múltiples Constructores es mejor. 
--- Permite evitar errores humanos de escritura. Al usar Strings, podríamos
--- tener en el sistema "espia" y espía", o "Diamante" y "diamante".
--- Al no tener un consenso de como se escribe, es más fácil confundirse en la escritura. 
--- No solo eso, sino que al crear un Múltiple Constructor evitamos que
--- en la utilización del sistema, alguien diga que un palo es "basto"
--- podría ser un error común, y los strings lo permitirían, los Múltiples
--- Constructores no. 
--- No es un error usar Strings, pero por sus posibels errores y fallas,
--- recomendmos usar Múltiples Constructores. 
+-- Aunque es posible usar `String` en lugar de constructores para modelar el palo y el rol de combate, 
+-- preferimos usar múltiples constructores. Esto se debe a que al trabajar con `String` podrían surgir 
+-- errores tipográficos, se coloca una carta con "espia" y otra con "espía" (con tilde), o "Diamante" y "diamante". Además, 
+-- usar múltiples constructores ayuda a evitar errores comunes, como escribir "basto" en una de las cartas (cuando aqui no es una opcion).
+-- Aunque el uso de `String` no está prohibido, la opción de usar constructores múltiples es más segura y menos propensa a fallos.
 
 -- --------------- Ejemplos
 
@@ -98,28 +89,29 @@ sombrerero = ("sombrerero", [])
 ejercitoReinaBlanca :: FuerzasBlancas
 ejercitoReinaBlanca = (daliaCentenaria, gatoDeCheshire)
 
--- Noten como dalia centenariaa y Gato de Chesire estan modelados como ejemplos,
--- como instancias de soldado blanco, de la misma forma qu rosa envidiosa
--- o sombrerero. NO LOS MODELO como las únicas opciones del ejerciot de la reina blanca.
--- Son ambos soldados blancos, y aunque ahora formna parte de las fuerzas blancas, 
--- en el futuro tal vez no, y debo saber modelarlo correctamente. 
--- Sería un error hacer esto: 
+-- Es importante notar que "DaliaCentenaria" y "GatoDeCheshire" están modelados como ejemplos de "SoldadoBlanco",
+-- lo que permite una mayor flexibilidad. Si bien en este caso forman parte de las "Fuerzas Blancas", 
+-- podrían cambiar o ampliarse en el futuro sin necesidad de modificar la estructura del código.
 
+-- Evita modelar "DaliaCentenaria" y "GatoDeCheshire" como tipos independientes (como se muestra en el ejemplo
+-- comentado más abajo), ya que esto dificultaría los cambios y la ampliación del sistema en el futuro.
 {-
-
 data DaliaCentenaria = UnSoldadoBlanco {
   nombre :: Nombre,
   habilidades :: [armas]
 }
-
 -}
 
--- EN vez del data o las tuplas de Soldado Blanco.
--- Lo mismo si hago esto:
--- type EjercitoBlanco = (daliaCentenaria, gatoDeCheshire)
--- En vez de lo que aparece en esta solucion liberada. 
--- El enunciado dice especificamnete que en el futuro podría cambiar
--- por lo que hay que tenerlo en cuenta al modelar. 
+-- Tampoco es recomendable definir un ejército blanco como un tipo rígido con los soldados ya definidos,
+-- ya que esto también limita la posibilidad de hacer cambios en el futuro. 
+-- En su lugar, usamos la definición flexible de "FuerzasBlancas", que permite agregar o cambiar los soldados 
+-- sin afectar la estructura general.
+{-
+type EjercitoBlanco = (daliaCentenaria, gatoDeCheshire)
+-}
+
+-- Usando este enfoque flexible, podemos agregar nuevos soldados o modificar los existentes sin necesidad de 
+-- modificar la estructura central del código, lo cual facilita la evolución del programa.
 
 -- -----------------------------------------------------------------------------
 -- --------------- PARTE II: PREPARANDO CAMPO DE BATALLA ---------------------------------
@@ -142,20 +134,24 @@ poder :: SoldadoBlanco -> Number
 poder = calculoComunPersonajes funcionPoder
 
 {-
-El lenguaje nos permite simplificar, como si fuera una ecuacion matematica,
-aquellos valores que encontramos de ambos lados. 
+Podemos aprovechar una característica del lenguaje que nos permite simplificar definiciones,
+como si estuviéramos resolviendo una ecuación matemática.
 
-Al igual que una ecuacion, no se puede sacar cualquier cosa, solo podemos sacar
-los parametros (nunca funciones) que estén "sueltas".
+Al igual que en las ecuaciones, solo podemos "eliminar" elementos que estén sueltos y aparezcan
+en ambos lados de la definición. Esto aplica, por ejemplo, a parámetros pero **no** a funciones.
+
+Por ejemplo:
 
 sumaHabilidad :: (String, [String]) -> Number
 sumaHabilidad personaje = calculoComunPersonajes personaje
 
-Se vuelve
+Se puede simplificar a:
 
 sumaHabilidad :: (String, [String]) -> Number
 sumaHabilidad = calculoComunPersonajes
 
+Esta forma es más concisa y expresa lo mismo. Aprender a reconocer estos patrones ayuda
+a escribir código más claro.
 -}
 
 calculoComunPersonajes :: Number -> SoldadoBlanco -> Number
@@ -182,13 +178,15 @@ bonusCantHabilidades :: [Habilidad] -> Number
 bonusCantHabilidades habilidades = bonusCantBase habilidades - multaSobrepeso habilidades
 
 {-
+Una forma de calcular energía que tal vez les suene familiar es la que usamos en el TP anterior:
+
 energiaPorCantArmas :: [String] -> Number
 energiaPorCantArmas armas
     | length armas <= 3 = length armas * 5
     | otherwise = 3 * 5 - (length armas - 3) * 3
 
-Recordar la forma en la que resolvimos los pinos en el TP anterior! No está mal pero en este caso podría ser más expresiva y declarativa
-
+No está mal, pero en este caso podemos ser más expresivos y aprovechar funciones como `min` y `max`
+para lograr lo mismo con mayor claridad y estilo declarativo.
 -}
 
 bonusCantBase :: [Habilidad] -> Number
@@ -202,25 +200,29 @@ bonusElemento eltoClave habilidades
   | elem eltoClave habilidades = 10
   | otherwise = 0
 
--- Noten como teniamos la posibilidad de hacer algo así:
 {-
+Veamos un ejemplo importante sobre **reutilización de código**:
+
+Supongamos que teníamos dos funciones como estas:
+
 tieneEspadaDePetalo :: DaliaCentenaria -> Bool
 tieneEspadaDePetalo dalia = "Espada de petalo" `elem` armas dalia
 
 tieneDesaparecetus :: GatoDeCheshire -> Bool
 tieneDesaparecetus gato = "Desaparecetus" `elem` hechizos gato
+
+Aunque ambas funciones son correctas y "declaran bien" lo que hacen,
+repiten una lógica muy similar: verificar si un string está presente
+en una lista de strings.
+
+Cuando vean que el enunciado les pide algo muy parecido en distintos lugares,
+es una excelente oportunidad para **abstraer** esa lógica y reutilizarla.
+
+En esta materia valoramos mucho que puedan detectar estos patrones y los generalicen.
+
+Recordá: cada vez que copiás y pegás código, un gatito muere :)
 -}
 
--- Esa solución, aunque es mas declarativa y expresiva, REPITE MUCHO CODIGO. 
--- Recuerden la clase, cada vez que no se reutiliza codigo, muere un gatito. 
--- Se evalua en los examanes por su reutilizacion de codigo, demuestra que 
--- conocen su codigo completo y que pueden pensar criticamnte sobre como pogramar. 
--- Deben estar entrenados para spotear stas instancias donde el enunciado
--- implicitamente, pide exactamente lo mismo en dos lados **muchas veces
--- es trampita para poder evaluar la reutilizacion de codigo**. 
--- Tienen que darse cuenta que tiene espada de petalo y tiene desaparacetus
--- ambos evaluan si se encuentra un string en una lista de strings, mas alla
--- si unas son armas y la otra hechizos. 
 
 -- --------------- Poder Mágico
 
@@ -238,13 +240,19 @@ rolParaDiamante carta
   | otherwise = Guerrero
 
 {-
-if nivel > 5 then Explosivo else Guerrero
+Sobre condicionales:
 
-Aunque no está mal usar if then else, y en otras cursadas encima se lo da en clase, aquí NO lo daremos como tema y NO esperamos que lo usen. Si requieren condicionales, recomendamos usar GUARDAS. 
+Sabemos que en otros cursos (¡y en internet!) pueden encontrar el uso de estructuras
+como `if-then-else`, `where`, `let`, `case`, `maybe`, entre otras. 
 
-Lo mismo con otras posibilidades del lenguaje como WHERE, LET, CASE, IN, MAYBE, en esta cursada NO lo vemos y NO lo usamos, NO usarlos en su solución. 
+Sin embargo, en esta cursada NO las vamos a usar, ni las vamos a evaluar.
 
+Cuando necesiten representar condiciones, utilicen **guardas** como lo venimos haciendo.
+
+Esto no significa que estén mal, solo que queremos enfocarnos en un subconjunto del lenguaje
+para aprender programación funcional con una base sólida y consistente.
 -}
+
 
 {-
 determinarRol :: Palo -> Number -> Estado -> String
@@ -257,7 +265,7 @@ determinarRol Trebol _ estado
     | estado == Activo = "Espía"
     | otherwise = "Guerrero"
 
-otra opción para rol combate.
+Otra opción para rol combate.
 
 -}
 
@@ -293,15 +301,8 @@ poderMagicoReinaRoja :: [CartaMagica] -> Number
 poderMagicoReinaRoja [] = 0
 poderMagicoReinaRoja [carta] = 3 * poderMagicoCarta carta
 poderMagicoReinaRoja cartas = poderMagicoCarta (head cartas) + poderMagicoCarta (cartas !! 1) + poderMagicoCarta (last cartas)
-
-{-
-poderMagicoReinaRoja :: [Carta] -> Number
-poderMagicoReinaRoja cartas 
-    | length cartas == 1 = poderMagicoCarta (head cartas) * 3
-    | otherwise = suma de poderes de cartas. 
-
-Esto como vemos en la solución puede resolverse de forma mas clara con PATTERN MATCHING
--}
+-- poderMagicoReinaRoja (c1:c2:resto) = poderMagicoCarta c1 + poderMagicoCarta c2 + poderMagicoCarta (last resto)
+-- Otra opcion posible. 
 
 {-
 poderPorEstadoInactivo :: Number
@@ -323,8 +324,18 @@ menosPoderPorSerEspiaMuyBueno = 30
 poderBasePorRolCurador :: Number
 poderBasePorRolCurador = 0.5
 
+En cuanto a las **constantes**:
 
-no siempre es correcto colocar MUCHAS constantes para hacer mas expresivo el codigo, hay que hacer un balance
+Muchas veces usar constantes con nombres claros ayuda a que el código sea más legible
+y fácil de mantener. Por ejemplo, en lugar de poner un `3` suelto, poner `cantBaseHabilidades`
+puede ayudar a entender de dónde viene ese número.
+
+Sin embargo, ¡ojo! Usar demasiadas constantes, o constantes demasiado específicas,
+puede hacer que el código se vuelva innecesariamente largo o difícil de leer.
+
+La clave está en encontrar el equilibrio:
+✔ Usar constantes que **agregan claridad**.
+✖ Evitar las que **solo suman ruido**.
 -}
 
 -- --------------- Infiltracion Encubierta
@@ -351,16 +362,26 @@ cambiarPalo carta nuevoPalo = carta{palo = nuevoPalo}
 cambiarNivel :: CartaMagica -> Number -> CartaMagica
 cambiarNivel carta nuevoNivel = carta{nivel = nuevoNivel}
 
--- Como se va a cambiar el palo y el nivel en VARIAS partes del programa
--- entonces, abstraigo su logica en una funcion auxiliar. 
--- Permite ser mas declarativos, expresivos y reutilizr codigo. 
+{-
+Cuando transformamos una carta, vemos que se modifican varias propiedades (como el palo o el nivel).
 
--- Aunque uno podría estar tentado a hacer una función 
--- cambiaProp :: CartaMagica -> a -> b -> CartaMagica
--- cambiarProp carta prop valor = carta{a = valor}
--- Lamentablemente no se puede !
--- Lo que sí, en proximas clases veremos formas muy cool de
--- resolver otro tipo de cosas parecidas. 
+Dado que estas modificaciones se repiten en distintas partes del código, es una muy buena idea
+abstraer esa lógica en funciones auxiliares como `cambiarPalo` o `cambiarNivel`.
+
+Esto no solo hace el código más limpio y reutilizable, también lo hace más declarativo y fácil de mantener.
+-}
+
+{-
+Por otro lado, una tentación puede ser generalizar de más:
+
+-- Esto NO se puede hacer:
+cambiarPropiedad carta propiedad valor = carta{propiedad = valor}
+
+Haskell no permite modificar dinámicamente cualquier campo de un registro
+solo con el nombre de la propiedad. Así que, en este caso, abstraer por separado
+cada cambio es lo más adecuado.
+-}
+
 
 -- -----------------------------------------------------------------------------
 -- --------------- PARTE III: ARCO DE ENTRENAMIENTO ---------------------------------
@@ -438,13 +459,16 @@ rolesDif :: [CartaMagica] -> Bool
 rolesDif ejercito = 
   rolEnCombate (head ejercito) /= rolEnCombate (last ejercito)
 
+-- Escribir código expresivo no significa usar más palabras,
+-- sino que el significado se entienda rápido y claro.
+-- A veces, agregar nombres intermedios o constantes innecesarias
+-- puede dificultar la lectura en vez de ayudar.
+
+-- Por ejemplo: 
 {-
 verificarNuevoPoderMagicoYAsignarPalo :: Number -> CartaMagica -> CartaMagica
 
 intercambiarRolesDeEjercitoReinaBlanca :: EjercitoReinaBlanca -> EjercitoReinaBlanca
 
 nroPrimerasLetrasDeNombreCoincidentes :: Number
-
-Generar código expresivo no siempr significa agregar mas palabras, sino que a una mirada rapida o semi rapida, l gente entienda el codigo. En estos casos, la cantidad de palabras es contraproducente, lo mismo con constantes de mas
 -}
-  
