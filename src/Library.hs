@@ -88,10 +88,10 @@ energiaTotalReinaBlanca :: FuerzasBlancas -> Number
 energiaTotalReinaBlanca (capitan, brujo) = sumaHabilidad brujo + poder capitan
 
 sumaHabilidad :: SoldadoBlanco -> Number
-sumaHabilidad soldado = calculoComunPersonajes soldado funcionSumaHabilidad
+sumaHabilidad = calculoComunPersonajes funcionSumaHabilidad
 
 poder :: SoldadoBlanco -> Number
-poder soldado = calculoComunPersonajes soldado funcionPoder
+poder = calculoComunPersonajes funcionPoder
 
 {-
 El lenguaje nos permite simplificar, como si fuera una ecuacion matematica,
@@ -110,7 +110,7 @@ sumaHabilidad = calculoComunPersonajes
 
 -}
 
-calculoComunPersonajes :: SoldadoBlanco -> Number -> Number
+calculoComunPersonajes :: Number -> SoldadoBlanco -> Number
 calculoComunPersonajes (nombre, habilidades) tipoFuncion
   | null habilidades = length nombre * 5
   | otherwise = 50 + bonusPorFuncion habilidades tipoFuncion
@@ -198,11 +198,7 @@ poderMagicoReinaRoja cartas = poderMagicoCarta (head cartas) + poderMagicoCarta 
 -- Función principal: infiltrar una carta en el ejército de la Reina Roja
 infiltrarCarta :: CartaMagica -> Number -> FuerzasRojas -> FuerzasRojas
 infiltrarCarta cartaInfiltrada n ejercito =
-  tomarInicio ejercito ++ [transformarCarta cartaInfiltrada n] ++ [last ejercito]
-
--- Toma todas las cartas menos la última
-tomarInicio :: [CartaMagica] -> [CartaMagica]
-tomarInicio ejercito = take (length ejercito - 1) ejercito
+  init ejercito ++ [transformarCarta cartaInfiltrada n] ++ [last ejercito]
 
 -- Transformación según número secreto n
 transformarCarta :: CartaMagica -> Number -> CartaMagica
@@ -270,9 +266,9 @@ intercambiarRolSeguidores (capitan, brujo) = (brujo, capitan)
 
 -- Preparamos una carta para la batalla según su nivel y poder mágico
 prepararCarta :: CartaMagica -> CartaMagica
-prepararCarta carta = transformar (actualizarNivel carta)
+prepararCarta carta = transformar (prepararCarta carta)
 
---prepararCarta :: CartaMagica -> CartaMagica
+prepararCarta :: CartaMagica -> CartaMagica
 prepararCarta carta
   | estado carta == Activa = cambiarNivel carta (nivel carta + 2)
   | otherwise = carta
@@ -282,11 +278,6 @@ transformar carta
   | poderMagicoCarta carta > 120 = cambiarPalo carta Diamante
   | poderMagicoCarta carta < 20  = cambiarPalo carta Corazon
   | otherwise = carta
-
-
-actualizarNivel:: CartaMagica -> CartaMagica
-actualizarNivel carta = carta
---TODO
 
 -- --------------- Test de Equilibrio
 
