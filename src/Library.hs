@@ -8,9 +8,9 @@ import PdePreludat
 
 -- Carta Mágica: nivel, palo y estado de actividad.
 data CartaMagica = UnaCartaMagica {
-  nivel :: Nivel,
+  nivel :: Number,
   palo :: Palo,
-  estado :: EstadoActividad
+  estado :: bool
 } deriving Show
 
 -- Para mayor claridad, es importante distinguir entre el tipo de dato y su constructor.
@@ -34,14 +34,15 @@ data SoldadoBlanco = UnSoldadoBlanco {
 }
 -}
 
+-- Las tuplas son un tipo de dato dificil de extender y modificar.
+-- Por eso, idealmente no deberiamos tener entidades importantes del dominio modelados 
+-- con ellas, porque si mañana queremos extenderlas, tenemos que 
+-- cambiar varias partes del codigo.
+
 -- --------------- Definicion de Tipos
 
-type Nivel = Number
 type Nombre = String
 type Habilidad = String
-
-data EstadoActividad = Activa | Inactiva
-  deriving (Eq, Show)
 
 data Palo = Corazon | Pica | Diamante | Trebol
   deriving (Eq, Show)
@@ -49,26 +50,26 @@ data Palo = Corazon | Pica | Diamante | Trebol
 data RolCombate = Curador | Guerrero | Explosivo | Espia
   deriving (Eq, Show)
 
--- Aunque es posible usar `String` en lugar de constructores para modelar el palo y el rol de combate, 
--- preferimos usar múltiples constructores. Esto se debe a que al trabajar con `String` podrían surgir 
--- errores tipográficos. Por ejemplo, se coloca una carta con "espia" y otra con "espía" (con tilde), o "Diamante" y "diamante". Además, 
--- usar múltiples constructores ayuda a evitar errores comunes, como escribir "basto" en una de las cartas (cuando aqui no es una opcion).
--- Aunque el uso de `String` no está prohibido, la opción de usar constructores múltiples es más segura y menos propensa a fallos.
+-- Modelamos el Palo y el Rol de Combate como multiples constructores, y no como Strings. 
+-- Esto se debe a que al trabajar con `String` podrían surgir errores tipográficos. Por ejemplo, se coloca 
+-- una carta con "espia" y otra con "espía" (con tilde), o "Diamante" y "diamante". Además, usar múltiples constructores
+-- ayuda a evitar errores comunes, como escribir "basto" en una de las cartas (cuando aqui no es una opcion).
+-- En conclusion, constructores múltiples es más segura y menos propensa a fallos.
 
 -- --------------- Ejemplos
 
 -- Ejemplos de cartas
 carta1 :: CartaMagica
-carta1 = UnaCartaMagica 5 Corazon Activa
+carta1 = UnaCartaMagica 5 Corazon True
 
 carta2 :: CartaMagica
-carta2 = UnaCartaMagica 3 Pica Inactiva
+carta2 = UnaCartaMagica 3 Pica False
 
 carta3 :: CartaMagica
-carta3 = UnaCartaMagica 10 Diamante Activa
+carta3 = UnaCartaMagica 10 Diamante True
 
 carta4 :: CartaMagica
-carta4 = UnaCartaMagica 7 Trebol Inactiva
+carta4 = UnaCartaMagica 7 Trebol False
 
 ejercitoReinaRoja :: FuerzasRojas
 ejercitoReinaRoja = [carta1, carta2, carta3, carta4]
@@ -88,32 +89,8 @@ sombrerero = ("sombrerero", [])
 ejercitoReinaBlanca :: FuerzasBlancas
 ejercitoReinaBlanca = (daliaCentenaria, gatoDeCheshire)
 
--- Es importante notar que "DaliaCentenaria" y "GatoDeCheshire" están modelados como ejemplos de "SoldadoBlanco",
--- lo que permite una mayor flexibilidad. Si bien en este caso forman parte de las "Fuerzas Blancas", 
--- podrían cambiar o ampliarse en el futuro sin necesidad de modificar la estructura del código.
-
--- Evita modelar "DaliaCentenaria" y "GatoDeCheshire" como tipos independientes (como se muestra en el ejemplo
--- comentado más abajo), ya que esto dificultaría los cambios y la ampliación del sistema en el futuro.
-{-
-data DaliaCentenaria = UnSoldadoBlanco {
-  nombre :: Nombre,
-  habilidades :: [armas]
-}
--}
-
--- Tampoco es recomendable definir un ejército blanco como un tipo rígido con los soldados ya definidos,
--- ya que esto también limita la posibilidad de hacer cambios en el futuro. 
--- En su lugar, usamos la definición flexible de "FuerzasBlancas", que permite agregar o cambiar los soldados 
--- sin afectar la estructura general.
-{-
-type EjercitoBlanco = (daliaCentenaria, gatoDeCheshire)
--}
-
--- Usando este enfoque flexible, podemos agregar nuevos soldados o modificar los existentes sin necesidad de 
--- modificar la estructura central del código, lo cual facilita la evolución del programa.
-
 -- -----------------------------------------------------------------------------
--- --------------- PARTE II: PREPARANDO CAMPO DE BATALLA ---------------------------------
+-- --------------- PARTE II: PREPARANDO CAMPO DE BATALLA -----------------------
 
 -- --------------- Energia Total
 
@@ -132,26 +109,6 @@ sumaHabilidad = calculoComunPersonajes funcionSumaHabilidad
 poder :: SoldadoBlanco -> Number
 poder = calculoComunPersonajes funcionPoder
 
-{-
-Podemos aprovechar una característica del lenguaje que nos permite simplificar definiciones,
-como si estuviéramos resolviendo una ecuación matemática.
-
-Al igual que en las ecuaciones, solo podemos "eliminar" elementos que estén sueltos y aparezcan
-en ambos lados de la definición. Esto aplica, por ejemplo, a parámetros pero NO a funciones.
-
-Por ejemplo:
-
-sumaHabilidad :: (String, [String]) -> Number
-sumaHabilidad personaje = calculoComunPersonajes personaje
-
-Se puede simplificar a:
-
-sumaHabilidad :: (String, [String]) -> Number
-sumaHabilidad = calculoComunPersonajes
-
-Esta forma es más concisa y expresa lo mismo. 
--}
-
 calculoComunPersonajes :: Number -> SoldadoBlanco -> Number
 calculoComunPersonajes (nombre, habilidades) tipoFuncion
   | null habilidades = length nombre * 5
@@ -165,12 +122,6 @@ bonusPorFuncion habilidades tipoFuncion
 
 cantBaseHabilidades :: Number
 cantBaseHabilidades = 3
-
-puntosBase :: Number
-puntosBase = 5
-
-cantMulta :: Number
-cantMulta = 3
   
 bonusCantHabilidades :: [Habilidad] -> Number
 bonusCantHabilidades habilidades = bonusCantBase habilidades - multaSobrepeso habilidades
@@ -185,19 +136,19 @@ energiaPorCantArmas armas
     | length armas <= 3 = length armas * 5
     | otherwise = 3 * 5 - (length armas - 3) * 3
 
-No está mal, pero en este caso podemos ser más expresivos y aprovechar funciones como `min` y `max`
+Repite lógica y es díficil de mantener. Podemos ser más expresivos y aprovechar funciones como `min` y `max`
 para lograr lo mismo con mayor claridad y estilo declarativo.
 -}
 
 bonusCantBase :: [Habilidad] -> Number
-bonusCantBase habilidades = min (length habilidades) cantBaseHabilidades * puntosBase
+bonusCantBase habilidades = min (length habilidades) cantBaseHabilidades * 5
 
 multaSobrepeso :: [Habilidad] -> Number
-multaSobrepeso habilidades = max (length habilidades - cantBaseHabilidades) 0 * cantMulta 
+multaSobrepeso habilidades = max (length habilidades - cantBaseHabilidades) 0 * 3 
 
 bonusElemento :: String -> [Habilidad] -> Number
-bonusElemento eltoClave habilidades
-  | elem eltoClave habilidades = 10
+bonusElemento elemento habilidades
+  | elem elemento habilidades = 10
   | otherwise = 0
 
 {-
@@ -212,8 +163,8 @@ tieneDesaparecetus :: GatoDeCheshire -> Bool
 tieneDesaparecetus gato = "Desaparecetus" `elem` hechizos gato
 
 Aunque ambas funciones son correctas y "declaran bien" lo que hacen,
-repiten una lógica muy similar: verificar si un string está presente
-en una lista de strings.
+repiten una estuctura y funcionalidad muy similar: verificar si un string está presente
+en una lista de strings (resuelto por el elem).
 
 Cuando vean que el enunciado les pide algo muy parecido en distintos lugares,
 es una excelente oportunidad para **abstraer** esa lógica y reutilizarla.
@@ -240,43 +191,29 @@ rolParaDiamante carta
   | otherwise = Guerrero
 
 {-
-Sobre condicionales:
+determinarRol :: CartaMagica -> RolCombate
+determinarRol (UnaCartaMagica Corazon _ _) = Curador
+determinarRol (UnaCartaMagica Pica _ _) = Guerrero
+determinarRol (UnaCartaMagica Diamante nivel _) 
+    | nivel > 5 = Explosivo
+    | otherwise = Guerrero
+determinarRol (UnaCartaMagica Trebol _ estado) 
+    | estado = Espía 
+    | otherwise = Guerrero
 
-Sabemos que en otros cursos (¡y en internet!) pueden encontrar el uso de estructuras
-como `if-then-else`, `where`, `let`, `case`, `maybe`, entre otras. 
-
-Sin embargo, en esta cursada NO las vamos a usar, ni las vamos a evaluar.
-
-Cuando necesiten representar condiciones, utilicen **guardas** como lo venimos haciendo.
-
-Esto no significa que estén mal, solo que queremos enfocarnos en un subconjunto del lenguaje
-para aprender programación funcional con una base sólida y consistente.
--}
-
-{-
-determinarRol :: Palo -> Number -> Estado -> String
-determinarRol Corazon _ _ = "Curador"
-determinarRol Pica _ _ = "Guerrero"
-determinarRol Diamante nivel _
-    | nivel > 5 = "Explosivo"
-    | otherwise = "Guerrero"
-determinarRol Trebol _ estado
-    | estado == Activo = "Espía"
-    | otherwise = "Guerrero"
-
-Otra opción para rol combate.
+Otra opción para rol combate, usando pattern matching de DATA. 
 
 -}
 
 rolParaTrebol :: CartaMagica -> RolCombate
 rolParaTrebol carta
-  | estado carta == Activa = Espia
+  | estado carta = Espia
   | otherwise = Guerrero
 
 -- Poder mágico individual de una carta
 poderMagicoCarta :: CartaMagica -> Number
 poderMagicoCarta carta
-  | estado carta == Inactiva = 0
+  | not(estado carta) = 0
   | rolEnCombate carta == Explosivo = nivel carta * 12
   | rolEnCombate carta == Guerrero = nivel carta * 8 + bonusDiamante (palo carta)
   | rolEnCombate carta == Espia  = poderEspia (nivel carta)
@@ -304,25 +241,18 @@ poderMagicoReinaRoja cartas = poderMagicoCarta (head cartas) + poderMagicoCarta 
 -- Otra opcion posible. 
 
 {-
-poderPorEstadoInactivo :: Number
-poderPorEstadoInactivo = 0
 
-poderBasePorRolExplosivo :: Number
-poderBasePorRolExplosivo = 12
+Otra opcion usando guardas:
 
-poderBasePorRolGuerrero :: Number
-poderBasePorRolGuerrero = 8
+poderMagicoReinaRoja :: [CartaMagica] -> Number
+poderMagicoReinaRoja cartas
+  | null cartas = 0
+  | length cartas == 1 = 3 * poderMagicoCarta carta
+  | otherwise = poderMagicoCarta (head cartas) + poderMagicoCarta (cartas !! 1) + poderMagicoCarta (last cartas)
 
-poderBasePorRolEspia :: Number
-poderBasePorRolEspia = 7
-nroARestarleElNivelDeEspia :: Number
-nroARestarleElNivelDeEspia = 13
-menosPoderPorSerEspiaMuyBueno :: Number
-menosPoderPorSerEspiaMuyBueno = 30
+-}
 
-poderBasePorRolCurador :: Number
-poderBasePorRolCurador = 0.5
-
+{-
 En cuanto a las **constantes**:
 
 Muchas veces usar constantes con nombres claros ayuda a que el código sea más legible
@@ -350,7 +280,7 @@ transformarCarta cartaInfiltrada n
   | esDivisible n 4 = cambiarPalo (cambiarNivel cartaInfiltrada n) Diamante
   | n == 33 = cambiarPalo cartaInfiltrada Corazon
   | esDivisible n 7 = cambiarPalo cartaInfiltrada Pica
-  | otherwise = cartaInfiltrada{estado = Inactiva}
+  | otherwise = cartaInfiltrada{estado = False}
 
 esDivisible :: Number -> Number -> Bool
 esDivisible dividendo divisor = mod dividendo divisor == 0
@@ -369,18 +299,6 @@ abstraer esa lógica en funciones auxiliares como `cambiarPalo` o `cambiarNivel`
 
 Esto no solo hace el código más limpio y reutilizable, también lo hace más declarativo y fácil de mantener.
 -}
-
-{-
-Por otro lado, una tentación puede ser generalizar de más:
-
--- Esto NO se puede hacer:
-cambiarPropiedad carta propiedad valor = carta{propiedad = valor}
-
-Haskell no permite modificar dinámicamente cualquier campo de un registro
-solo con el nombre de la propiedad. Así que, en este caso, abstraer por separado
-cada cambio es lo más adecuado.
--}
-
 
 -- -----------------------------------------------------------------------------
 -- --------------- PARTE III: ARCO DE ENTRENAMIENTO ---------------------------------
@@ -401,17 +319,16 @@ aprenderHechizo soldado habilidad
   | otherwise = soldado
 
 puedeAprender :: SoldadoBlanco -> Habilidad  -> Bool
-puedeAprender soldado habilidad 
-  | habilidadYaDominada habilidad soldado  = False
-  | primerasTresLetrasIguales (nombre soldado) habilidad = True
-  | length (habilidades soldado) > 100 = True
-  | otherwise = False
+puedeAprender soldado habilidad = 
+  not(habilidadYaDominada habilidad soldado) &&
+  (primerasTresLetrasIguales (nombre soldado) habilidad ||
+  length (habilidades soldado) > 100 )
 
 primerasTresLetrasIguales :: String -> String -> Bool
 primerasTresLetrasIguales p1 p2 = primerasTresLetras p1 == primerasTresLetras p2
 
 primerasTresLetras :: String -> String
-primerasTresLetras = take 3
+primerasTresLetras palabra = take 3 palabra
 
 habilidadYaDominada :: String -> Brujo -> Bool
 habilidadYaDominada habilidad soldado = habilidad `elem` snd soldado
@@ -428,7 +345,7 @@ prepararCarta carta = transformar (prepararCarta carta)
 
 prepararCarta :: CartaMagica -> CartaMagica
 prepararCarta carta
-  | estado carta == Activa = cambiarNivel carta (nivel carta + 2)
+  | estado carta = cambiarNivel carta (nivel carta + 2)
   | otherwise = carta
 
 transformar :: CartaMagica -> CartaMagica
@@ -440,7 +357,7 @@ transformar carta
 -- --------------- Test de Equilibrio
 
 formacionBalanceada :: [CartaMagica] -> Bool
-formacionBalanceada ejercito = esPar ejercito && rolesDif ejercito
+formacionBalanceada ejercito = esPar ejercito && tieneRolesDiferentes ejercito
 
 esPar :: [CartaMagica] -> Bool
 esPar ejercito = even (length ejercito)
@@ -454,8 +371,8 @@ esCantidadDeCartasPar cartas
 -}
 
 
-rolesDif :: [CartaMagica] -> Bool
-rolesDif ejercito = 
+tieneRolesDiferentes :: [CartaMagica] -> Bool
+tieneRolesDiferentes ejercito = 
   rolEnCombate (head ejercito) /= rolEnCombate (last ejercito)
 
 -- Escribir código expresivo no significa usar más palabras,
@@ -463,11 +380,5 @@ rolesDif ejercito =
 -- A veces, agregar nombres intermedios o constantes innecesarias
 -- puede dificultar la lectura en vez de ayudar.
 
--- Por ejemplo: 
-{-
-verificarNuevoPoderMagicoYAsignarPalo :: Number -> CartaMagica -> CartaMagica
-
-intercambiarRolesDeEjercitoReinaBlanca :: EjercitoReinaBlanca -> EjercitoReinaBlanca
-
-nroPrimerasLetrasDeNombreCoincidentes :: Number
--}
+-- Por ejemplo: ultimaYPrimerCartaTienenRolesDiferentes, termina
+-- siendo menos claro que tieneRolesDiferentes acompañado de su función. 
