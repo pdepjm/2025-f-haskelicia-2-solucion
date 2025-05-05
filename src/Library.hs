@@ -94,31 +94,35 @@ ejercitoReinaBlanca = (daliaCentenaria, gatoDeCheshire)
 
 -- --------------- Energia Total
 
-funcionSumaHabilidad :: Number
-funcionSumaHabilidad = 1
+nombre :: SoldadoBlanco -> Nombre
+nombre = fst
 
-funcionPoder :: Number
-funcionPoder = 0
+habilidades :: SoldadoBlanco -> [Habilidad]
+habilidades = snd
 
 energiaTotalReinaBlanca :: FuerzasBlancas -> Number
-energiaTotalReinaBlanca (capitan, brujo) = sumaHabilidad brujo + poder capitan
+energiaTotalReinaBlanca (capitan, brujo) = energia brujo + energia capitan
 
-sumaHabilidad :: SoldadoBlanco -> Number
-sumaHabilidad = calculoComunPersonajes funcionSumaHabilidad
-
-poder :: SoldadoBlanco -> Number
-poder = calculoComunPersonajes funcionPoder
-
-calculoComunPersonajes :: Number -> SoldadoBlanco -> Number
-calculoComunPersonajes (nombre, habilidades) tipoFuncion
+energia :: SoldadoBlanco -> Number
+energia (nombre, habilidades) 
   | null habilidades = length nombre * 5
-  | otherwise = 50 + bonusPorFuncion habilidades tipoFuncion
+  | otherwise = 50 + bonusPorPersonaje (nombre, habilidades)
 
-bonusPorFuncion:: [Habilidad] -> Number -> Number
-bonusPorFuncion habilidades tipoFuncion
-  | tipoFuncion == funcionPoder = bonusElemento "espada de petalo" habilidades + bonusCantHabilidades habilidades
-  | tipoFuncion == funcionSumaHabilidad = bonusElemento "desaparacetus" habilidades
+bonusPorPersonaje :: SoldadoBlanco -> Number
+bonusPorPersonaje (nombre, habilidades) 
+  | esCapitan nombre = sumaHabilidades habilidades
+  | otherwise = poder habilidades
 
+sumaHabilidad :: [Habilidad] -> Number
+sumaHabilidad habilidades = 
+  bonusElemento "espada de petalo" habilidades + 
+  bonusCantHabilidades habilidades
+
+poder :: [Habilidad] -> Number
+poder habilidades = bonusElemento "desaparacetus" habilidades
+
+esCapitan :: Nombre -> Bool
+esCapitan nombre = nombre (fst fuerzasBlancas) == nombre
 
 cantBaseHabilidades :: Number
 cantBaseHabilidades = 3
@@ -306,12 +310,6 @@ Esto no solo hace el código más limpio y reutilizable, también lo hace más d
 -- --------------- UTN: Universidad de Trucos y Nigromancia
 
 -- Primera Funcion
-
-nombre :: SoldadoBlanco -> Nombre
-nombre = fst
-
-habilidades :: SoldadoBlanco -> [Habilidad]
-habilidades = snd
 
 aprenderHechizo :: SoldadoBlanco -> Habilidad -> SoldadoBlanco
 aprenderHechizo soldado habilidad
