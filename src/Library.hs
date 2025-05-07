@@ -10,7 +10,7 @@ import PdePreludat
 data CartaMagica = UnaCartaMagica {
   nivel :: Number,
   palo :: Palo,
-  estado :: bool
+  estado :: Bool
 } deriving Show
 
 -- Para mayor claridad, es importante distinguir entre el tipo de dato y su constructor.
@@ -34,42 +34,47 @@ data SoldadoBlanco = UnSoldadoBlanco {
 }
 -}
 
--- Las tuplas son un tipo de dato dificil de extender y modificar.
+-- Las tuplas son un tipo de dato básico, anónimo, donde todo está por hacerse.
 -- Por eso, idealmente no deberiamos tener entidades importantes del dominio modelados 
--- con ellas, porque si mañana queremos extenderlas, tenemos que 
--- cambiar varias partes del codigo.
+-- con ellas, sino con Data, que son como tuplas, pero podemos darle nombres personalizados, 
+-- se generan automaticamente funciones para acceder a sus componentes, 
+-- y otras facilidades por tratarse de nuevos tipos de datos 
 
 -- --------------- Definicion de Tipos
 
 type Nombre = String
-type Habilidad = String
+type Caracteristica = String
+type Palo = String
+type RolCombate = String
 
+-- Por ahora modelamos Palo y el Rol de Combate como strings, para mantenerlo simple
+-- Sería mejor utilizar multiples constructores, con identificadores más apropiados, de la siguiente manera:
+{-
 data Palo = Corazon | Pica | Diamante | Trebol
   deriving (Eq, Show)
 
 data RolCombate = Curador | Guerrero | Explosivo | Espia
   deriving (Eq, Show)
-
--- Modelamos el Palo y el Rol de Combate como multiples constructores, y no como Strings. 
--- Esto se debe a que al trabajar con `String` podrían surgir errores tipográficos. Por ejemplo, se coloca 
--- una carta con "espia" y otra con "espía" (con tilde), o "Diamante" y "diamante". Además, usar múltiples constructores
--- ayuda a evitar errores comunes, como escribir "basto" en una de las cartas (cuando aqui no es una opcion).
--- En conclusion, constructores múltiples es más segura y menos propensa a fallos.
+-}
+-- De esta manera el mismo lenguaje detecta  errores tipográficos que con `String` pasarían inadvertidos. Por ejemplo, se coloca 
+-- una carta con "espia" y otra con "espía" (con tilde), o "Diamante" y "diamante". 
+-- Cuando la cantidad de elementos es finita y previsible, enumerar los posibles valores de un tipo de dato 
+-- mediante múltiples constructores es la opción más segura.
 
 -- --------------- Ejemplos
 
 -- Ejemplos de cartas
 carta1 :: CartaMagica
-carta1 = UnaCartaMagica 5 Corazon True
+carta1 = UnaCartaMagica 5 "Corazon" True
 
 carta2 :: CartaMagica
-carta2 = UnaCartaMagica 3 Pica False
+carta2 = UnaCartaMagica 3 "Pica" False
 
 carta3 :: CartaMagica
-carta3 = UnaCartaMagica 10 Diamante True
+carta3 = UnaCartaMagica 10 "Diamante" True
 
 carta4 :: CartaMagica
-carta4 = UnaCartaMagica 7 Trebol False
+carta4 = UnaCartaMagica 7 "Trebol" False
 
 ejercitoReinaRoja :: FuerzasRojas
 ejercitoReinaRoja = [carta1, carta2, carta3, carta4]
@@ -97,35 +102,8 @@ ejercitoReinaBlanca = (daliaCentenaria, gatoDeCheshire)
 nombre :: SoldadoBlanco -> Nombre
 nombre = fst
 
-habilidades :: SoldadoBlanco -> [Habilidad]
-habilidades = snd
-
--- OPCION 1
-energiaTotalReinaBlanca :: FuerzasBlancas -> Number
-energiaTotalReinaBlanca (capitan, brujo) = energia brujo + energia capitan
-
-energia :: SoldadoBlanco -> Number
-energia (nombre, habilidades) 
-  | null habilidades = length nombre * 5
-  | otherwise = 50 + bonusPorPersonaje (nombre, habilidades)
-
-bonusPorPersonaje :: SoldadoBlanco -> Number
-bonusPorPersonaje (nombre, habilidades) 
-  | esCapitan (nombre, habilidades) = sumaHabilidades habilidades
-  | otherwise = poder habilidades
-
-sumaHabilidad :: [Habilidad] -> Number
-sumaHabilidad habilidades = 
-  bonusElemento "espada de petalo" habilidades + 
-  bonusCantHabilidades habilidades
-
-poder :: [Habilidad] -> Number
-poder habilidades = bonusElemento "desaparacetus" habilidades
-
-esCapitan :: SoldadoBlanco -> Bool
-esCapitan soldado = fst fuerzasBlancas == soldado
-
-{-  OPCION 2
+caracteristicas :: SoldadoBlanco -> [Caracteristica]
+caracteristicas = snd
 
 energiaBase :: Number
 energiaBase = 50
@@ -133,78 +111,77 @@ energiaBase = 50
 energiaTotalReinaBlanca :: FuerzasBlancas -> Number
 energiaTotalReinaBlanca (capitan, brujo) = poder brujo + sumaHabilidades capitan
 
-sumaHabilidades :: Capitan -> Number
-sumaHabilidades (nombre, habilidades) 
-  | null habilidades = length nombre * 5
-  | otherwise = energiaBase + bonusSumaHabilidades habilidades
+sumaHabilidades :: SoldadoBlanco -> Number
+sumaHabilidades (nom, []) = energia nom
+sumaHabilidades (_, caract) = energiaBase + bonusPor "espada de petalo" caract + bonusCantHabilidades caract
 
-poder :: Brujo -> Number
-poder (nombre, habilidades) 
-  | null habilidades = length nombre * 5
-  | otherwise = energiaBase + bonusElemento "desaparacetus" habilidades
+energia Nombre -> Number
+energia nombre = length nombre * 5
 
-bonusSumaHabilidades :: [Habilidad] -> Number
-bonusSumaHabilidades habilidades = 
-  bonusElemento "espada de petalo" habilidades + 
-  bonusCantHabilidades habilidades
+poder :: SoldadoBlanco -> Number
+poder soldado 
+  | null (habilidades soldado) = energia (nombre soldado)
+  | otherwise = energiaBase + bonusPor "desaparacetus" (caracteristicas soldado)
 
+bonusPor :: Caracteristica -> [Caracteristica] -> Number
+bonusPor c cs
+  | elem c cs = 10 
+  | otherwise = 0
+  
 
-Si bien ambas opciones cumplen con el objetivo, cada una tiene ventajas y desventajas. 
+{-  
+Si bien hay otras opciones que cumplen con el objetivo, cada una tiene ventajas y desventajas. 
 La idea no es encontrar “la correcta”, sino entender qué decisiones de diseño hay detrás y qué impacto tienen.  
 
-La opcion 1 tiene un acoplamiento entre la idea de "Capitan" y la estructura 
-de las Fuerzas Blancas. Se define que Capitan == Primera posición de la tupla FuerzasBlancas,
-por lo que cualquier cambio en Fuerzas Blancas me obligaría hacer un cambio aquí.
+Todos los posibles integrantes de las Fuerzas Blancas son del mismo tipo: soldados, son su nombre y caracteristicas, 
+que es un término genérico para referirse a armas, hechizos o lo que sea que caracterice al soldado.
+No hay nada que los diferencie en su lógica, de todos puede calcularse su poder, habilidades, bonus, etc.
+La diferencia está en lo que la Reina Blanca pide de ellos según el rol que ocupen en su ejercito, si de capitan o de mago:
+al personaje que esté en ese momento como primer componente de la tupla (o sea capital) le pregunta el poder 
+y al que está como segundo (mago) le pregunta su habilidad.
+No es necesario validar que sea un Capitan o Brujo, porque los roles son intercambiables, son todos soldados. 
 
-Sumado a esto, cada vez que yo quiera usar un soldado, debo validar 
-que sea un Capitan o Brujo, en vez de que el soldado ya sea un Capitan o Brujo.
-Un cambio en la definicion de Capitan o Brujo haría que deba hacer cambios profundos en la
-solución. 
+La lógica solicitada del cálculo de poder y de la habilidad son similares, por lo que para evitar repetir lógica se llama a funciones auxiliares.
+Podría pensarse en alguna fórmula que generalice aún más, pero dada la particularidad del requerimiento quedaría muy compleja.
+De esta manera, si bien persiste cierta similitud, queda facil de entender cómo se calcula cada cosa.
+Para manejar la tupla del soldado, una de las soluciones usa pattern matching y la otra no sino que remite a funciones auxiliares
+para cada componente de la tupla. Están a propósito así para que vean las variantes que existen, de manera similar a si hubieramos usado data.
 
-En cambio, la segunda opción se anima a repetir un poco más de lógica, pero gana en claridad. 
-Acá separamos explícitamente al capitán del brujo desde el principio, lo que hace que el código sea más fácil de leer y de entender. 
- 
-La contra es que estamos repitiendo bastante código. Ahora puede parecer inofensivo, 
+No está bueno repetir código. Ahora puede parecer inofensivo, 
 pero a medida que el sistema crece, mantenerlo se vuelve más difícil y propenso a errores.
 
-Al mostrar estas dos opciones, lo que buscamos es que puedan ver las decisiones que tomamos como programadores. 
+Buscamos es que puedan ver las decisiones que tomamos como programadores. 
 A veces tenemos que elegir entre flexibilidad y claridad, o entre reutilización y simplicidad. 
 Lo importante es poder justificar esas elecciones y ser conscientes de sus consecuencias.
 
-Como spoiler, más adelante vamos a ver una tercera forma de encarar este tipo de funciones, que usa **orden superior**. 
-
 -}
+
+bonusCantHabilidades :: [Caracteristica] -> Number
+bonusCantHabilidades cs = length (take 3 cs) * 5 - length (drop 3 cs) * 3
+
+{-
+Otras formas posibles son: 
+
+bonusCantHabilidades :: [Caracteristica] -> Number
+bonusCantHabilidades cs
+    | length cs <= 3 = length cs * 5
+    | otherwise = 3 * 5 - (length cs - 3) * 3
+
+Repite lógica y es díficil de mantener. Podemos ser más expresivos y aprovechar funciones como `min` y `max`
+para lograr lo mismo con mayor claridad y estilo declarativo.
 
 cantBaseHabilidades :: Number
 cantBaseHabilidades = 3
   
-bonusCantHabilidades :: [Habilidad] -> Number
+bonusCantHabilidades :: [Caracteristica] -> Number
 bonusCantHabilidades habilidades = bonusCantBase habilidades - multaSobrepeso habilidades
-
-{-
-De la misma forma habiamos calculado el peso de un pino en el TP anterior. 
-
-Recordamos que algo así:
-
-energiaPorCantArmas :: [String] -> Number
-energiaPorCantArmas armas
-    | length armas <= 3 = length armas * 5
-    | otherwise = 3 * 5 - (length armas - 3) * 3
-
-Repite lógica y es díficil de mantener. Podemos ser más expresivos y aprovechar funciones como `min` y `max`
-para lograr lo mismo con mayor claridad y estilo declarativo.
--}
 
 bonusCantBase :: [Habilidad] -> Number
 bonusCantBase habilidades = min (length habilidades) cantBaseHabilidades * 5
 
 multaSobrepeso :: [Habilidad] -> Number
 multaSobrepeso habilidades = max (length habilidades - cantBaseHabilidades) 0 * 3 
-
-bonusElemento :: String -> [Habilidad] -> Number
-bonusElemento elemento habilidades
-  | elem elemento habilidades = 10
-  | otherwise = 0
+-}
 
 -- --------------- Poder Mágico
 
