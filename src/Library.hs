@@ -100,6 +100,7 @@ nombre = fst
 habilidades :: SoldadoBlanco -> [Habilidad]
 habilidades = snd
 
+-- OPCION 1
 energiaTotalReinaBlanca :: FuerzasBlancas -> Number
 energiaTotalReinaBlanca (capitan, brujo) = energia brujo + energia capitan
 
@@ -110,7 +111,7 @@ energia (nombre, habilidades)
 
 bonusPorPersonaje :: SoldadoBlanco -> Number
 bonusPorPersonaje (nombre, habilidades) 
-  | esCapitan nombre = sumaHabilidades habilidades
+  | esCapitan (nombre, habilidades) = sumaHabilidades habilidades
   | otherwise = poder habilidades
 
 sumaHabilidad :: [Habilidad] -> Number
@@ -121,8 +122,58 @@ sumaHabilidad habilidades =
 poder :: [Habilidad] -> Number
 poder habilidades = bonusElemento "desaparacetus" habilidades
 
-esCapitan :: Nombre -> Bool
-esCapitan nombre = nombre (fst fuerzasBlancas) == nombre
+esCapitan :: SoldadoBlanco -> Bool
+esCapitan soldado = fst fuerzasBlancas == soldado
+
+{-  OPCION 2
+
+energiaBase :: Number
+energiaBase = 50
+
+energiaTotalReinaBlanca :: FuerzasBlancas -> Number
+energiaTotalReinaBlanca (capitan, brujo) = poder brujo + sumaHabilidades capitan
+
+sumaHabilidades :: Capitan -> Number
+sumaHabilidades (nombre, habilidades) 
+  | null habilidades = length nombre * 5
+  | otherwise = energiaBase + bonusSumaHabilidades habilidades
+
+poder :: Brujo -> Number
+poder (nombre, habilidades) 
+  | null habilidades = length nombre * 5
+  | otherwise = energiaBase + bonusElemento "desaparacetus" habilidades
+
+bonusSumaHabilidades :: [Habilidad] -> Number
+bonusSumaHabilidades habilidades = 
+  bonusElemento "espada de petalo" habilidades + 
+  bonusCantHabilidades habilidades
+
+
+Si bien ambas opciones cumplen con el objetivo, cada una tiene ventajas y desventajas. 
+La idea no es encontrar “la correcta”, sino entender qué decisiones de diseño hay detrás y qué impacto tienen.  
+
+La opcion 1 tiene un acoplamiento entre la idea de "Capitan" y la estructura 
+de las Fuerzas Blancas. Se define que Capitan == Primera posición de la tupla FuerzasBlancas,
+por lo que cualquier cambio en Fuerzas Blancas me obligaría hacer un cambio aquí.
+
+Sumado a esto, cada vez que yo quiera usar un soldado, debo validar 
+que sea un Capitan o Brujo, en vez de que el soldado ya sea un Capitan o Brujo.
+Un cambio en la definicion de Capitan o Brujo haría que deba hacer cambios profundos en la
+solución. 
+
+En cambio, la segunda opción se anima a repetir un poco más de lógica, pero gana en claridad. 
+Acá separamos explícitamente al capitán del brujo desde el principio, lo que hace que el código sea más fácil de leer y de entender. 
+ 
+La contra es que estamos repitiendo bastante código. Ahora puede parecer inofensivo, 
+pero a medida que el sistema crece, mantenerlo se vuelve más difícil y propenso a errores.
+
+Al mostrar estas dos opciones, lo que buscamos es que puedan ver las decisiones que tomamos como programadores. 
+A veces tenemos que elegir entre flexibilidad y claridad, o entre reutilización y simplicidad. 
+Lo importante es poder justificar esas elecciones y ser conscientes de sus consecuencias.
+
+Como spoiler, más adelante vamos a ver una tercera forma de encarar este tipo de funciones, que usa **orden superior**. 
+
+-}
 
 cantBaseHabilidades :: Number
 cantBaseHabilidades = 3
@@ -154,30 +205,6 @@ bonusElemento :: String -> [Habilidad] -> Number
 bonusElemento elemento habilidades
   | elem elemento habilidades = 10
   | otherwise = 0
-
-{-
-Veamos un ejemplo importante sobre **reutilización de código**:
-
-Supongamos que teníamos dos funciones como estas:
-
-tieneEspadaDePetalo :: DaliaCentenaria -> Bool
-tieneEspadaDePetalo dalia = "Espada de petalo" `elem` armas dalia
-
-tieneDesaparecetus :: GatoDeCheshire -> Bool
-tieneDesaparecetus gato = "Desaparecetus" `elem` hechizos gato
-
-Aunque ambas funciones son correctas y "declaran bien" lo que hacen,
-repiten una estuctura y funcionalidad muy similar: verificar si un string está presente
-en una lista de strings (resuelto por el elem).
-
-Cuando vean que el enunciado les pide algo muy parecido en distintos lugares,
-es una excelente oportunidad para **abstraer** esa lógica y reutilizarla.
-
-En esta materia valoramos mucho que puedan detectar estos patrones y los generalicen.
-
-Recordá: cada vez que copiás y pegás código, un gatito muere :)
--}
-
 
 -- --------------- Poder Mágico
 
