@@ -131,7 +131,7 @@ poder soldado
   | null (habilidades soldado) = energia (nombre soldado)
   | otherwise = energiaBase + bonusPor "desaparacetus" (caracteristicas soldado)
 
-energia Nombre -> Number
+energia:: Nombre -> Number
 energia nombre = length nombre * 5
 
 bonusPor :: Caracteristica -> [Caracteristica] -> Number
@@ -187,10 +187,10 @@ cantBaseHabilidades = 3
 bonusCantHabilidades :: [Caracteristica] -> Number
 bonusCantHabilidades habilidades = bonusCantBase habilidades - multaSobrepeso habilidades
 
-bonusCantBase :: [Habilidad] -> Number
+bonusCantBase :: [Caracteristica] -> Number
 bonusCantBase habilidades = min (length habilidades) cantBaseHabilidades * 5
 
-multaSobrepeso :: [Habilidad] -> Number
+multaSobrepeso :: [Caracteristica] -> Number
 multaSobrepeso habilidades = max (length habilidades - cantBaseHabilidades) 0 * 3 
 -}
 
@@ -350,16 +350,16 @@ Esto no solo hace el código más limpio y reutilizable, también lo hace más d
 
 -- Primera Funcion
 
-aprenderHechizo :: SoldadoBlanco -> Habilidad -> SoldadoBlanco
-aprenderHechizo soldado habilidad
-  | puedeAprender soldado habilidad = (nombre soldado, habilidades soldado ++ [habilidad])
+aprenderHechizo :: SoldadoBlanco -> Caracteristica -> SoldadoBlanco
+aprenderHechizo soldado caracteristica
+  | puedeAprender soldado caracteristica = (nombre soldado, caracteristica:caracteristicas soldado)
   | otherwise = soldado
 
-puedeAprender :: SoldadoBlanco -> Habilidad  -> Bool
-puedeAprender soldado habilidad = 
-  not(habilidadYaDominada habilidad soldado) &&
-  (primerasTresLetrasIguales (nombre soldado) habilidad ||
-  length (habilidades soldado) > 100 )
+puedeAprender :: SoldadoBlanco -> Caracteristica  -> Bool
+puedeAprender soldado caracteristica = 
+  not(caracteristicaYaDominada caracteristica soldado) &&
+  (primerasTresLetrasIguales (nombre soldado) caracteristica ||
+  length (caracteristicas soldado) > 100 )
 
 primerasTresLetrasIguales :: String -> String -> Bool
 primerasTresLetrasIguales p1 p2 = primerasTresLetras p1 == primerasTresLetras p2
@@ -367,8 +367,8 @@ primerasTresLetrasIguales p1 p2 = primerasTresLetras p1 == primerasTresLetras p2
 primerasTresLetras :: String -> String
 primerasTresLetras palabra = take 3 palabra
 
-habilidadYaDominada :: String -> SoldadoBlanco -> Bool
-habilidadYaDominada habilidad soldado = habilidad `elem` (caracteristicas soldado)
+caracteristicaYaDominada :: String -> SoldadoBlanco -> Bool
+caracteristicaYaDominada caracteristica soldado = caracteristica `elem` (caracteristicas soldado)
 
 -- Segunda Funcion
 intercambiarRolSeguidores :: FuerzasBlancas -> FuerzasBlancas
