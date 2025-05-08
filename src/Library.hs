@@ -18,34 +18,37 @@ data CartaMagica = UnaCartaMagica {
 
 type FuerzasRojas = [CartaMagica]
 
-type SoldadoBlanco = (Nombre, [Habilidad])
-type Brujo = SoldadoBlanco
-type Capitan = SoldadoBlanco
-type FuerzasBlancas = (Capitan, Brujo)
-
--- Como alternativa, también podríamos usar `data` para modelar a los soldados blancos.
--- El código a continuación muestra una posible definición usando `data`. Sin embargo, 
--- hemos optado por usar tuplas en este caso para mostrar cómo utilizarlas correctamente.
+-- Podríamos usar `data` para modelar a los soldados blancos.
+-- El código a continuación muestra una posible definición usando `data`. 
 
 {-
 data SoldadoBlanco = UnSoldadoBlanco {
   nombre :: Nombre,
-  habilidades :: [Habilidad]
+  caracteristicas :: [Caracteristica]
 }
 -}
-
+-- Sin embargo, hemos optado por usar tuplas en este caso para mostrar cómo utilizarlas correctamente.
 -- Las tuplas son un tipo de dato básico, anónimo, donde todo está por hacerse.
--- Por eso, idealmente no deberiamos tener entidades importantes del dominio modelados 
--- con ellas, sino con Data, que son como tuplas, pero podemos darle nombres personalizados, 
+-- Por eso, idealmente no deberiamos tener entidades importantes del dominio modelados con ellas, sino con Data.
+-- La ventaja de data es que si bien son como tuplas, podemos darle identificadores personalizados, 
 -- se generan automaticamente funciones para acceder a sus componentes, 
 -- y otras facilidades por tratarse de nuevos tipos de datos 
 
--- --------------- Definicion de Tipos
+----------------- Definicion de Tipos
 
 type Nombre = String
 type Caracteristica = String
 
--- En la solucion esperabamos que se modelara con Strings y con un alias de tipo, que es lo mas simple
+type SoldadoBlanco = (Nombre, [Caracteristica])
+type FuerzasBlancas = (SoldadoBlanco, SoldadoBlanco)
+
+nombre :: SoldadoBlanco -> Nombre
+nombre soldado = fst soldado
+
+caracteristicas :: SoldadoBlanco -> [Caracteristica]
+caracteristicas soldado = snd soldado
+
+-- Palo y rol de combate, en la solucion esperabamos que se modelara con Strings y con un alias de tipo, que es lo mas simple
 -- type Palo = String
 -- type RolCombate = String
 {-
@@ -113,12 +116,6 @@ ejercitoReinaBlanca = (daliaCentenaria, gatoDeCheshire)
 
 -- --------------- Energia Total
 
-nombre :: SoldadoBlanco -> Nombre
-nombre = fst
-
-caracteristicas :: SoldadoBlanco -> [Caracteristica]
-caracteristicas = snd
-
 energiaBase :: Number
 energiaBase = 50
 
@@ -141,7 +138,7 @@ bonusPor :: Caracteristica -> [Caracteristica] -> Number
 bonusPor c cs
   | elem c cs = 10 
   | otherwise = 0
-  
+ 
 
 {-  
 Si bien hay otras opciones que cumplen con el objetivo, cada una tiene ventajas y desventajas. 
