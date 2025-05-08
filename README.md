@@ -1,9 +1,10 @@
-# ejercicio-alumno
+# HaskeIIicia: La Batalla de las Reinas
+(Haskellicia 2)
 
-> Importante: Recordá que el archivo principal para escribir tu programa es [src/Library.hs](src/Library.hs) y los tests se escriben en [src/Spec.hs](src/Spec.hs).
+** Imaginen que ese II es como el 2 de Gladiador 2… se intentó 😭
 
-## Integrantes
+En el País de las Maravillas ha estallado una guerra sin precedentes entre la Reina Roja y la Reina Blanca. La primera, con su ejército de cartas encantadas, busca imponer su tiranía sobre todo el Reino. La segunda, respaldada por sus leales aliados del bosque encantado, lucha por preservar la paz y la armonía.
 
-- integrante1 (usuario github)
-- integrante2 (usuario github)
-...
+Vos, como aprendiz de Haskell, tendrás la misión de usar la magia de la programación funcional para definir el destino de esta batalla épica.
+
+[Consigna completa](https://docs.google.com/document/d/1sN4iG4x9L4ZjP-Brko7SL7GUmpNh7dxUmzbe_t_C1yk/edit?usp=sharing)
