@@ -32,7 +32,7 @@ data SoldadoBlanco = UnSoldadoBlanco {
 -- Por eso, idealmente no deberiamos tener entidades importantes del dominio modelados con ellas, sino con Data.
 -- La ventaja de data es que si bien son como tuplas, podemos darle identificadores personalizados, 
 -- se generan automaticamente funciones para acceder a sus componentes, 
--- y otras facilidades por tratarse de nuevos tipos de datos 
+-- y otras facilidades por tratarse de nuevos tipos de datos. 
 
 ----------------- Definicion de Tipos
 
@@ -48,7 +48,7 @@ nombre soldado = fst soldado
 caracteristicas :: SoldadoBlanco -> [Caracteristica]
 caracteristicas soldado = snd soldado
 
--- Palo y rol de combate, en la solucion esperabamos que se modelara con Strings y con un alias de tipo, que es lo mas simple
+-- Palo y rol de combate, en la solucion esperabamos que se modelara con Strings y con un alias de tipo, que es lo mas simple:
 -- type Palo = String
 -- type RolCombate = String
 {-
@@ -74,9 +74,9 @@ data Palo = Corazon | Pica | Diamante | Trebol
 data RolCombate = Curador | Guerrero | Explosivo | Espia
   deriving (Eq, Show)
 
--- De esta manera el mismo lenguaje detecta  errores tipográficos que con `String` pasarían inadvertidos. Por ejemplo, se coloca 
+-- De esta manera el mismo lenguaje detecta errores tipográficos que con `String` pasarían inadvertidos. Por ejemplo, se coloca 
 -- una carta con "espia" y otra con "espía" (con tilde), o "Diamante" y "diamante". 
--- Cuando la cantidad de elementos es finita y previsible, esta opción más segura.
+-- Cuando la cantidad de elementos es finita y previsible, esta opción es más segura.
 
 -- --------------- Ejemplos
 
@@ -126,13 +126,13 @@ sumaHabilidades :: SoldadoBlanco -> Number
 sumaHabilidades (nom, []) = energia nom
 sumaHabilidades (_, caract) = energiaBase + bonusPor "espada de petalo" caract + bonusCantHabilidades caract
 
-energia Nombre -> Number
-energia nombre = length nombre * 5
-
 poder :: SoldadoBlanco -> Number
 poder soldado 
   | null (habilidades soldado) = energia (nombre soldado)
   | otherwise = energiaBase + bonusPor "desaparacetus" (caracteristicas soldado)
+
+energia Nombre -> Number
+energia nombre = length nombre * 5
 
 bonusPor :: Caracteristica -> [Caracteristica] -> Number
 bonusPor c cs
@@ -152,7 +152,7 @@ al personaje que esté en ese momento como primer componente de la tupla (o sea 
 y al que está como segundo (mago) le pregunta su habilidad.
 No es necesario validar que sea un Capitan o Brujo, porque los roles son intercambiables, son todos soldados. 
 
-La lógica solicitada del cálculo de poder y de la habilidad son similares, por lo que para evitar repetir lógica se llama a funciones auxiliares.
+La lógica solicitada del cálculo de poder y de habilidad son similares, por lo que para evitar repetir lógica se llama a funciones auxiliares.
 Podría pensarse en alguna fórmula que generalice aún más, pero dada la particularidad del requerimiento quedaría muy compleja.
 De esta manera, si bien persiste cierta similitud, queda facil de entender cómo se calcula cada cosa.
 Para manejar la tupla del soldado, una de las soluciones usa pattern matching y la otra no sino que remite a funciones auxiliares
@@ -161,7 +161,7 @@ para cada componente de la tupla. Están a propósito así para que vean las var
 No está bueno repetir código. Ahora puede parecer inofensivo, 
 pero a medida que el sistema crece, mantenerlo se vuelve más difícil y propenso a errores.
 
-Buscamos es que puedan ver las decisiones que tomamos como programadores. 
+Buscamos que puedan ver las decisiones que tomamos como programadores. 
 A veces tenemos que elegir entre flexibilidad y claridad, o entre reutilización y simplicidad. 
 Lo importante es poder justificar esas elecciones y ser conscientes de sus consecuencias.
 
@@ -209,25 +209,25 @@ rolParaDiamante carta
   | nivel carta > 5 = Explosivo
   | otherwise = Guerrero
 
+rolParaTrebol :: CartaMagica -> RolCombate
+rolParaTrebol carta
+  | estado carta = Espia
+  | otherwise = Guerrero
+
 {-
-determinarRol :: CartaMagica -> RolCombate
-determinarRol (UnaCartaMagica Corazon _ _) = Curador
-determinarRol (UnaCartaMagica Pica _ _) = Guerrero
-determinarRol (UnaCartaMagica Diamante nivel _) 
+rolEnCombate :: CartaMagica -> RolCombate
+rolEnCombate (UnaCartaMagica Corazon _ _) = Curador
+rolEnCombate (UnaCartaMagica Pica _ _) = Guerrero
+rolEnCombate (UnaCartaMagica Diamante nivel _) 
     | nivel > 5 = Explosivo
     | otherwise = Guerrero
-determinarRol (UnaCartaMagica Trebol _ estado) 
+rolEnCombate (UnaCartaMagica Trebol _ estado) 
     | estado = Espía 
     | otherwise = Guerrero
 
 Otra opción para rol combate, usando pattern matching de DATA. 
 
 -}
-
-rolParaTrebol :: CartaMagica -> RolCombate
-rolParaTrebol carta
-  | estado carta = Espia
-  | otherwise = Guerrero
 
 -- Poder mágico individual de una carta
 poderMagicoCarta :: CartaMagica -> Number
@@ -266,7 +266,7 @@ Otra opcion usando guardas:
 poderMagicoReinaRoja :: [CartaMagica] -> Number
 poderMagicoReinaRoja cartas
   | null cartas = 0
-  | length cartas == 1 = 3 * poderMagicoCarta carta
+  | length cartas == 1 = 3 * poderMagicoCarta (head cartas)
   | otherwise = poderMagicoCarta (head cartas) + poderMagicoCarta (cartas !! 1) + poderMagicoCarta (last cartas)
 
 -}
@@ -284,6 +284,30 @@ puede hacer que el código se vuelva innecesariamente largo o difícil de leer.
 La clave está en encontrar el equilibrio:
 ✔ Usar constantes que **agregan claridad**.
 ✖ Evitar las que **solo suman ruido**.
+
+En general, colocamos constantes cuando el mismo concepto se repite varias veces, 
+o es muy importante para el dominio. 
+-}
+
+{-
+Por ejemplo, en la siguiente función no colocamos constantes:
+
+-- poderEspiaBase nivel = (13 - nivel) * 7
+
+Mientras que aquí si las colocamos:
+
+energiaBase :: Number
+energiaBase = 50
+
+sumaHabilidades :: SoldadoBlanco -> Number
+sumaHabilidades (nom, []) = energia nom
+sumaHabilidades (_, caract) = energiaBase + bonusPor "espada de petalo" caract + bonusCantHabilidades caract
+
+poder :: SoldadoBlanco -> Number
+poder soldado 
+  | null (habilidades soldado) = energia (nombre soldado)
+  | otherwise = energiaBase + bonusPor "desaparacetus" (caracteristicas soldado)
+
 -}
 
 -- --------------- Infiltracion Encubierta
@@ -343,8 +367,8 @@ primerasTresLetrasIguales p1 p2 = primerasTresLetras p1 == primerasTresLetras p2
 primerasTresLetras :: String -> String
 primerasTresLetras palabra = take 3 palabra
 
-habilidadYaDominada :: String -> Brujo -> Bool
-habilidadYaDominada habilidad soldado = habilidad `elem` snd soldado
+habilidadYaDominada :: String -> SoldadoBlanco -> Bool
+habilidadYaDominada habilidad soldado = habilidad `elem` (caracteristicas soldado)
 
 -- Segunda Funcion
 intercambiarRolSeguidores :: FuerzasBlancas -> FuerzasBlancas
@@ -354,10 +378,10 @@ intercambiarRolSeguidores (capitan, brujo) = (brujo, capitan)
 
 -- Preparamos una carta para la batalla según su nivel y poder mágico
 prepararCarta :: CartaMagica -> CartaMagica
-prepararCarta carta = transformar (prepararCarta carta)
+prepararCarta carta = transformar (aumentarNivel carta)
 
-prepararCarta :: CartaMagica -> CartaMagica
-prepararCarta carta
+aumentarNivel :: CartaMagica -> CartaMagica
+aumentarNivel carta
   | estado carta = cambiarNivel carta (nivel carta + 2)
   | otherwise = carta
 
