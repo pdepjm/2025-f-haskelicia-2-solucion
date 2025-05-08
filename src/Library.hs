@@ -44,26 +44,11 @@ data SoldadoBlanco = UnSoldadoBlanco {
 
 type Nombre = String
 type Caracteristica = String
-type Palo = String
-type RolCombate = String
 
--- Por ahora modelamos Palo y el Rol de Combate como strings, para mantenerlo simple
--- Sería mejor utilizar multiples constructores, con identificadores más apropiados, de la siguiente manera:
+-- En la solucion esperabamos que se modelara con Strings y con un alias de tipo, que es lo mas simple
+-- type Palo = String
+-- type RolCombate = String
 {-
-data Palo = Corazon | Pica | Diamante | Trebol
-  deriving (Eq, Show)
-
-data RolCombate = Curador | Guerrero | Explosivo | Espia
-  deriving (Eq, Show)
--}
--- De esta manera el mismo lenguaje detecta  errores tipográficos que con `String` pasarían inadvertidos. Por ejemplo, se coloca 
--- una carta con "espia" y otra con "espía" (con tilde), o "Diamante" y "diamante". 
--- Cuando la cantidad de elementos es finita y previsible, enumerar los posibles valores de un tipo de dato 
--- mediante múltiples constructores es la opción más segura.
-
--- --------------- Ejemplos
-
--- Ejemplos de cartas
 carta1 :: CartaMagica
 carta1 = UnaCartaMagica 5 "Corazon" True
 
@@ -75,6 +60,35 @@ carta3 = UnaCartaMagica 10 "Diamante" True
 
 carta4 :: CartaMagica
 carta4 = UnaCartaMagica 7 "Trebol" False
+-} 
+
+-- Por aprovechamos a hacerlo definiendo un nuevo tipo de dato con multiples constructores, como una enumeración de los valores posibles
+-- e identificadores más apropiados, de la siguiente manera:
+
+data Palo = Corazon | Pica | Diamante | Trebol
+  deriving (Eq, Show)
+
+data RolCombate = Curador | Guerrero | Explosivo | Espia
+  deriving (Eq, Show)
+
+-- De esta manera el mismo lenguaje detecta  errores tipográficos que con `String` pasarían inadvertidos. Por ejemplo, se coloca 
+-- una carta con "espia" y otra con "espía" (con tilde), o "Diamante" y "diamante". 
+-- Cuando la cantidad de elementos es finita y previsible, esta opción más segura.
+
+-- --------------- Ejemplos
+
+-- Ejemplos de cartas
+carta1 :: CartaMagica
+carta1 = UnaCartaMagica 5 Corazon True
+
+carta2 :: CartaMagica
+carta2 = UnaCartaMagica 3 Pica False
+
+carta3 :: CartaMagica
+carta3 = UnaCartaMagica 10 Diamante True
+
+carta4 :: CartaMagica
+carta4 = UnaCartaMagica 7 Trebol False
 
 ejercitoReinaRoja :: FuerzasRojas
 ejercitoReinaRoja = [carta1, carta2, carta3, carta4]
